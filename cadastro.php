@@ -7,7 +7,26 @@ session_start();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro | Thunder Store</title>
-    <link rel="stylesheet" href="/assets/index-R2RkWoEQ.css">
+    <!-- <link rel="stylesheet" href="/assets/index-R2RkWoEQ.css"> -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ff-orange': '#FF9900',
+                        'ff-black': '#111111',
+                        'ff-gray': '#1F1F1F',
+                        'ff-red': '#DC2626',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
     <style>
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }

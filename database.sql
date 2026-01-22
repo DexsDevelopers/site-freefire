@@ -101,7 +101,7 @@ INSERT INTO plans (product_id, name, price) VALUES
 
 -- 5. Call of Duty
 INSERT INTO products (slug, name, description, image_url, status, features) VALUES 
-('cod', 'CALL OF DUTY', 'Warzone e Multiplayer. Domine o campo de batalha com ESP avançado e Aimbot humanizado.', '/img/Call of Duty.jpg', 'Ativo', 'UAV Constante|Aimbot|ESP Players|ESP Loot')
+('cod', 'CALL OF DUTY', 'Warzone e Multiplayer. Domine o campo de batalha com ESP avançado e Aimbot humanizado.', '/img/call-of-duty.jpg', 'Ativo', 'UAV Constante|Aimbot|ESP Players|ESP Loot')
 ON DUPLICATE KEY UPDATE name=name;
 
 SET @cod_id = (SELECT id FROM products WHERE slug = 'cod');
