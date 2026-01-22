@@ -1,12 +1,6 @@
 <?php
 session_start();
-
-$dbOk = true;
-try {
-    require_once 'api/db.php';
-} catch (Throwable $e) {
-    $dbOk = false;
-}
+require_once 'api/db.php';
 
 // Obtém o slug do produto da URL (ex: comprar.php?game=freefire)
 $slug = isset($_GET['game']) ? trim((string)$_GET['game']) : '';
@@ -17,73 +11,30 @@ if (empty($slug)) {
     exit;
 }
 
-$product = null;
-$plans = [];
+// Busca informações do produto
+$stmt = $conn->prepare("SELECT * FROM products WHERE slug = ? LIMIT 1");
+$stmt->bind_param("s", $slug);
+$stmt->execute();
+$result_product = $stmt->get_result();
 
-if ($dbOk && isset($conn)) {
-    $stmt = $conn->prepare("SELECT * FROM products WHERE slug = ? LIMIT 1");
-    $stmt->bind_param("s", $slug);
-    $stmt->execute();
-    $result_product = $stmt->get_result();
-
-    if ($result_product && $result_product->num_rows > 0) {
-        $product = $result_product->fetch_assoc();
-
-        $product_id = (int)$product['id'];
-        $stmt = $conn->prepare("SELECT * FROM plans WHERE product_id = ? ORDER BY price ASC");
-        $stmt->bind_param("i", $product_id);
-        $stmt->execute();
-        $result_plans = $stmt->get_result();
-        while ($row = $result_plans->fetch_assoc()) {
-            $plans[] = $row;
-        }
-    }
+if (!$result_product || $result_product->num_rows === 0) {
+    http_response_code(404);
+    echo "Produto não encontrado.";
+    exit;
 }
 
-if (!$product) {
-    $fallback = [
-        'freefire' => [
-            'product' => [
-                'id' => 1,
-                'slug' => 'freefire',
-                'name' => 'FREE FIRE',
-                'description' => 'Funções premium, suporte e atualizações constantes.',
-                'image_url' => '/img/freefire.jpg',
-                'features' => 'Chams|Aimbot|No Recoil|AimFov|CameraHack',
-            ],
-            'plans' => [
-                ['id' => 101, 'product_id' => 1, 'name' => 'Diário', 'price' => 15.00],
-                ['id' => 102, 'product_id' => 1, 'name' => 'Semanal', 'price' => 30.00],
-                ['id' => 103, 'product_id' => 1, 'name' => 'Mensal', 'price' => 60.00],
-                ['id' => 104, 'product_id' => 1, 'name' => 'Permanente', 'price' => 160.00],
-            ],
-        ],
-        'valorant' => [
-            'product' => [
-                'id' => 2,
-                'slug' => 'valorant',
-                'name' => 'VALORANT',
-                'description' => 'Monitor premium, performance e estabilidade.',
-                'image_url' => '/img/valorantwall.jpg',
-                'features' => 'HGV ON/OFF|Indetectável|No Lag',
-            ],
-            'plans' => [
-                ['id' => 201, 'product_id' => 2, 'name' => 'Diário', 'price' => 20.00],
-                ['id' => 202, 'product_id' => 2, 'name' => 'Semanal', 'price' => 50.00],
-                ['id' => 203, 'product_id' => 2, 'name' => 'Mensal', 'price' => 90.00],
-                ['id' => 204, 'product_id' => 2, 'name' => 'Permanente', 'price' => 250.00],
-            ],
-        ],
-    ];
+$product = $result_product->fetch_assoc();
 
-    if (!isset($fallback[$slug])) {
-        http_response_code(404);
-        echo "Produto não encontrado.";
-        exit;
-    }
+// Busca planos do produto
+$product_id = (int)$product['id'];
+$stmt = $conn->prepare("SELECT * FROM plans WHERE product_id = ? ORDER BY price ASC");
+$stmt->bind_param("i", $product_id);
+$stmt->execute();
+$result_plans = $stmt->get_result();
 
-    $product = $fallback[$slug]['product'];
-    $plans = $fallback[$slug]['plans'];
+$plans = [];
+while ($row = $result_plans->fetch_assoc()) {
+    $plans[] = $row;
 }
 
 $bestPlanId = 0;
@@ -593,4 +544,4 @@ $planCount = count($plans);
     </script>
 </body>
 </html>
-<?php if (isset($conn)) { $conn->close(); } ?>
+<?php $conn->close(); ?>
