@@ -2,8 +2,18 @@
 session_start();
 require_once 'api/db.php';
 
-// Busca todos os produtos
-$sql = "SELECT * FROM products WHERE status = 'Ativo'";
+// Busca todos os produtos + métricas de planos
+$sql = "
+    SELECT
+        p.*,
+        COALESCE(MIN(pl.price), 0) AS min_price,
+        COUNT(pl.id) AS plan_count
+    FROM products p
+    LEFT JOIN plans pl ON pl.product_id = p.id
+    WHERE p.status = 'Ativo'
+    GROUP BY p.id
+    ORDER BY p.id DESC
+";
 $result = $conn->query($sql);
 ?>
 <!doctype html>
@@ -11,9 +21,9 @@ $result = $conn->query($sql);
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Thunder Store | Loja de Free Fire</title>
-    <meta name="description" content="Sua loja confiável para produtos de Free Fire. Diamantes, contas e muito mais com entrega imediata." />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>Thunder Store | Produtos</title>
+    <meta name="description" content="Produtos para vários jogos: entrega rápida, segurança e suporte." />
     <!-- <link rel="stylesheet" crossorigin href="/assets/index-R2RkWoEQ.css"> -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -36,8 +46,19 @@ $result = $conn->query($sql);
     </script>
     <style>
         html { scroll-behavior: smooth; }
+        html, body { touch-action: pan-x pan-y; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
+        .reveal { opacity: 0; transform: translateY(18px); filter: blur(6px); transition: opacity 700ms cubic-bezier(.2,.8,.2,1), transform 700ms cubic-bezier(.2,.8,.2,1), filter 700ms cubic-bezier(.2,.8,.2,1); }
+        .reveal.is-in { opacity: 1; transform: translateY(0); filter: blur(0); }
+        .shine {
+            background: radial-gradient(900px 280px at var(--mx, 50%) var(--my, 50%), rgba(220,38,38,0.18), transparent 55%),
+                        radial-gradient(900px 280px at calc(var(--mx, 50%) + 120px) calc(var(--my, 50%) + 80px), rgba(255,255,255,0.08), transparent 60%);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+        }
     </style>
+    <script src="/assets/no-zoom.js" defer></script>
   </head>
   <body class="bg-black text-white min-h-screen">
     
@@ -97,7 +118,7 @@ $result = $conn->query($sql);
 
                 <!-- Right: Loja Button -->
                 <div class="flex items-center">
-                     <a href="#produtos" class="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full flex items-center gap-2 shadow-[0_0_25px_rgba(255,165,0,0.35)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all border border-white/10 hover:border-white/20">
+                     <a href="#produtos" class="hidden xl:flex bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full items-center gap-2 shadow-[0_0_25px_rgba(255,165,0,0.35)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all border border-white/10 hover:border-white/20">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transform skew-x-[10deg]" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         <span class="transform skew-x-[10deg] text-sm">LOJA</span>
                      </a>
@@ -318,43 +339,128 @@ $result = $conn->query($sql);
     <!-- Products Section -->
     <div id="produtos" class="py-16 bg-black">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-center mb-12 uppercase tracking-wider">
-                ESCOLHA O <span class="text-red-600 border-b-4 border-red-600">SEU JOGO</span>
-            </h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <?php while($product = $result->fetch_assoc()): ?>
-                <div class="group bg-zinc-900/50 border border-zinc-800 hover:border-red-600/50 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_rgba(220,38,38,0.2)] hover:-translate-y-2">
-                    <div class="relative h-48 overflow-hidden">
-                        <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-                        <div class="absolute bottom-4 left-4">
-                            <h3 class="text-xl font-bold text-white group-hover:text-red-500 transition-colors"><?php echo htmlspecialchars($product['name']); ?></h3>
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
+                <div class="reveal" data-reveal>
+                    <h2 class="text-3xl md:text-4xl font-black uppercase tracking-wider">
+                        Produtos <span class="text-red-600">Premium</span>
+                    </h2>
+                    <p class="text-gray-400 mt-2 max-w-2xl">Filtre por jogo, veja recursos, compare preços e escolha o plano ideal.</p>
+                </div>
+
+                <div class="reveal w-full lg:w-auto" data-reveal>
+                    <div class="relative w-full lg:w-[420px]">
+                        <div class="absolute inset-0 rounded-2xl blur-2xl opacity-30 bg-red-600/20"></div>
+                        <div class="relative flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                            <input id="productSearch" class="w-full bg-transparent outline-none text-sm font-semibold placeholder:text-white/40" placeholder="Buscar jogo, recurso, nome..." />
+                            <button id="clearSearch" class="hidden px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-black">Limpar</button>
                         </div>
-                    </div>
-                    
-                    <div class="p-6">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="flex text-yellow-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                            </div>
-                            <span class="text-xs text-gray-500 font-medium">5.0 (2k+ reviews)</span>
-                        </div>
-                        
-                        <p class="text-gray-400 text-sm mb-6 line-clamp-3">
-                            <?php echo htmlspecialchars($product['description']); ?>
-                        </p>
-                        
-                        <a href="/comprar.php?game=<?php echo $product['slug']; ?>" class="block w-full text-center bg-white/5 hover:bg-red-600 text-white font-bold py-3 rounded-lg border border-white/10 hover:border-red-500 transition-all duration-300">
-                            VER PLANOS
-                        </a>
                     </div>
                 </div>
-                <?php endwhile; ?>
+            </div>
+
+            <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <?php $i = 0; while($product = $result->fetch_assoc()): ?>
+                <?php
+                    $featuresRaw = (string)($product['features'] ?? '');
+                    $features = $featuresRaw !== '' ? array_values(array_filter(array_map('trim', explode('|', $featuresRaw)))) : [];
+                    $featuresTop = array_slice($features, 0, 6);
+                    $minPrice = (float)($product['min_price'] ?? 0);
+                    $planCount = (int)($product['plan_count'] ?? 0);
+                ?>
+                <div
+                    class="product-card reveal group rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-red-600/40 hover:shadow-[0_0_45px_rgba(220,38,38,0.18)]"
+                    data-reveal
+                    data-name="<?php echo htmlspecialchars($product['name']); ?>"
+                    data-slug="<?php echo htmlspecialchars($product['slug']); ?>"
+                    data-features="<?php echo htmlspecialchars(implode(' ', $features)); ?>"
+                    style="transition-delay: <?php echo (int)(($i % 9) * 45); ?>ms;"
+                >
+                    <div class="relative h-52 overflow-hidden shine">
+                        <img
+                            src="<?php echo htmlspecialchars($product['image_url']); ?>"
+                            alt="<?php echo htmlspecialchars($product['name']); ?>"
+                            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            loading="lazy"
+                        >
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                        <div class="absolute top-4 left-4 flex items-center gap-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-green-500/10 border border-green-500/20 text-green-300">
+                                ATIVO
+                            </span>
+                            <?php if ($planCount > 0): ?>
+                                <span class="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-white/5 border border-white/10 text-white/80">
+                                    <?php echo $planCount; ?> planos
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="flex items-end justify-between gap-4">
+                                <div>
+                                    <h3 class="text-2xl font-black text-white tracking-tight leading-tight">
+                                        <?php echo htmlspecialchars($product['name']); ?>
+                                    </h3>
+                                    <div class="text-xs text-white/60 font-semibold mt-1"><?php echo htmlspecialchars($product['slug']); ?></div>
+                                </div>
+                                <?php if ($minPrice > 0): ?>
+                                    <div class="text-right">
+                                        <div class="text-[10px] uppercase tracking-widest text-white/50 font-bold">a partir de</div>
+                                        <div class="text-lg font-black text-white">R$ <?php echo number_format($minPrice, 2, ',', '.'); ?></div>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <p class="text-gray-300/80 text-sm leading-relaxed line-clamp-3">
+                            <?php echo htmlspecialchars((string)$product['description']); ?>
+                        </p>
+
+                        <?php if (count($featuresTop) > 0): ?>
+                            <div class="mt-5 flex flex-wrap gap-2">
+                                <?php foreach ($featuresTop as $f): ?>
+                                    <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wide bg-black/40 border border-white/10 text-white/80">
+                                        <?php echo htmlspecialchars($f); ?>
+                                    </span>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="mt-6 flex items-center gap-3">
+                            <a
+                                href="/comprar.php?game=<?php echo $product['slug']; ?>"
+                                class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black py-3 transition-all shadow-[0_10px_25px_rgba(220,38,38,0.22)] hover:shadow-[0_14px_34px_rgba(220,38,38,0.30)]"
+                            >
+                                Ver planos
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14"></path>
+                                    <path d="m13 5 7 7-7 7"></path>
+                                </svg>
+                            </a>
+                            <a
+                                href="/comprar.php?game=<?php echo $product['slug']; ?>"
+                                class="min-w-12 min-h-12 inline-flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition"
+                                title="Detalhes"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <?php $i++; endwhile; ?>
+            </div>
+
+            <div id="noProducts" class="hidden mt-10 rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
+                <div class="text-xl font-black">Nada encontrado</div>
+                <div class="text-sm text-white/60 mt-2">Tente buscar por outro nome ou recurso.</div>
             </div>
         </div>
     </div>
@@ -397,6 +503,65 @@ $result = $conn->query($sql);
                     menu.classList.add('hidden');
                     toggle.setAttribute('aria-expanded', 'false');
                 }
+            });
+        })();
+
+        (function () {
+            const items = document.querySelectorAll('[data-reveal]');
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!items.length) return;
+
+            if (prefersReduced || !('IntersectionObserver' in window)) {
+                items.forEach(el => el.classList.add('is-in'));
+                return;
+            }
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach((e) => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('is-in');
+                        io.unobserve(e.target);
+                    }
+                });
+            }, { threshold: 0.18 });
+            items.forEach(el => io.observe(el));
+        })();
+
+        (function () {
+            const search = document.getElementById('productSearch');
+            const clear = document.getElementById('clearSearch');
+            const cards = Array.from(document.querySelectorAll('.product-card'));
+            const empty = document.getElementById('noProducts');
+            if (!search || !cards.length) return;
+
+            function applyFilter() {
+                const q = (search.value || '').trim().toLowerCase();
+                let visible = 0;
+                cards.forEach((c) => {
+                    const hay = (c.dataset.name + ' ' + c.dataset.slug + ' ' + c.dataset.features).toLowerCase();
+                    const ok = q === '' || hay.includes(q);
+                    c.classList.toggle('hidden', !ok);
+                    if (ok) visible++;
+                });
+                if (clear) clear.classList.toggle('hidden', q === '');
+                if (empty) empty.classList.toggle('hidden', visible !== 0);
+            }
+
+            search.addEventListener('input', applyFilter);
+            if (clear) clear.addEventListener('click', () => { search.value = ''; applyFilter(); search.focus(); });
+
+            cards.forEach((card) => {
+                const onMove = (e) => {
+                    const r = card.getBoundingClientRect();
+                    const x = ((e.clientX - r.left) / r.width) * 100;
+                    const y = ((e.clientY - r.top) / r.height) * 100;
+                    card.style.setProperty('--mx', x + '%');
+                    card.style.setProperty('--my', y + '%');
+                };
+                card.addEventListener('mousemove', onMove);
+                card.addEventListener('mouseleave', () => {
+                    card.style.removeProperty('--mx');
+                    card.style.removeProperty('--my');
+                });
             });
         })();
     </script>

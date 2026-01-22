@@ -3,7 +3,7 @@ session_start();
 require_once 'api/db.php';
 
 // Obtém o slug do produto da URL (ex: comprar.php?game=freefire)
-$slug = isset($_GET['game']) ? $conn->real_escape_string($_GET['game']) : '';
+$slug = isset($_GET['game']) ? trim((string)$_GET['game']) : '';
 
 if (empty($slug)) {
     // Redireciona para a home se não houver produto especificado
@@ -12,10 +12,13 @@ if (empty($slug)) {
 }
 
 // Busca informações do produto
-$sql_product = "SELECT * FROM products WHERE slug = '$slug' LIMIT 1";
-$result_product = $conn->query($sql_product);
+$stmt = $conn->prepare("SELECT * FROM products WHERE slug = ? LIMIT 1");
+$stmt->bind_param("s", $slug);
+$stmt->execute();
+$result_product = $stmt->get_result();
 
-if ($result_product->num_rows == 0) {
+if (!$result_product || $result_product->num_rows === 0) {
+    http_response_code(404);
     echo "Produto não encontrado.";
     exit;
 }
@@ -23,9 +26,41 @@ if ($result_product->num_rows == 0) {
 $product = $result_product->fetch_assoc();
 
 // Busca planos do produto
-$product_id = $product['id'];
-$sql_plans = "SELECT * FROM plans WHERE product_id = $product_id ORDER BY price ASC";
-$result_plans = $conn->query($sql_plans);
+$product_id = (int)$product['id'];
+$stmt = $conn->prepare("SELECT * FROM plans WHERE product_id = ? ORDER BY price ASC");
+$stmt->bind_param("i", $product_id);
+$stmt->execute();
+$result_plans = $stmt->get_result();
+
+$plans = [];
+while ($row = $result_plans->fetch_assoc()) {
+    $plans[] = $row;
+}
+
+$bestPlanId = 0;
+foreach ($plans as $pl) {
+    $n = mb_strtolower((string)($pl['name'] ?? ''));
+    if (str_contains($n, 'mensal')) {
+        $bestPlanId = (int)$pl['id'];
+        break;
+    }
+}
+if ($bestPlanId === 0 && count($plans) >= 2) {
+    $bestPlanId = (int)$plans[1]['id'];
+}
+if ($bestPlanId === 0 && count($plans) === 1) {
+    $bestPlanId = (int)$plans[0]['id'];
+}
+
+$featuresRaw = (string)($product['features'] ?? '');
+$featuresList = $featuresRaw !== '' ? array_values(array_filter(array_map('trim', explode('|', $featuresRaw)))) : [];
+$featuresTop = array_slice($featuresList, 0, 10);
+$minPrice = null;
+foreach ($plans as $pl) {
+    $p = (float)($pl['price'] ?? 0);
+    if ($p > 0 && ($minPrice === null || $p < $minPrice)) $minPrice = $p;
+}
+$planCount = count($plans);
 
 ?>
 <!DOCTYPE html>
@@ -33,7 +68,7 @@ $result_plans = $conn->query($sql_plans);
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Comprar <?php echo htmlspecialchars($product['name']); ?> - Thunder Store</title>
     <!-- <link rel="stylesheet" crossorigin href="/assets/index-R2RkWoEQ.css"> -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -55,6 +90,17 @@ $result_plans = $conn->query($sql_plans);
             }
         }
     </script>
+    <style>
+        html, body { touch-action: pan-x pan-y; }
+        .reveal { opacity: 0; transform: translateY(18px); filter: blur(6px); transition: opacity 700ms cubic-bezier(.2,.8,.2,1), transform 700ms cubic-bezier(.2,.8,.2,1), filter 700ms cubic-bezier(.2,.8,.2,1); }
+        .reveal.is-in { opacity: 1; transform: translateY(0); filter: blur(0); }
+        .glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10); }
+        .glow { box-shadow: 0 0 0 1px rgba(220,38,38,0.15), 0 18px 55px rgba(220,38,38,0.10); }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+        }
+    </style>
+    <script src="/assets/no-zoom.js" defer></script>
 </head>
 <body class="bg-black text-white font-sans antialiased">
     <div id="root">
@@ -115,7 +161,7 @@ $result_plans = $conn->query($sql_plans);
         
                         <!-- Right: Loja Button -->
                         <div class="flex items-center">
-                             <a href="/#produtos" class="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full flex items-center gap-2 shadow-[0_0_25px_rgba(255,165,0,0.35)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all border border-white/10 hover:border-white/20">
+                             <a href="/#produtos" class="hidden xl:flex bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full items-center gap-2 shadow-[0_0_25px_rgba(255,165,0,0.35)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all border border-white/10 hover:border-white/20">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transform skew-x-[10deg]" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                                 <span class="transform skew-x-[10deg] text-sm">LOJA</span>
                              </a>
@@ -157,100 +203,220 @@ $result_plans = $conn->query($sql_plans);
             </nav>
 
             <!-- Main Content -->
-            <div class="pt-32 pb-16 px-4 sm:px-6 lg:px-8 flex-grow flex items-center justify-center">
-                <div class="max-w-4xl w-full bg-[#111] border border-white/10 rounded-2xl p-8 md:p-12 shadow-[0_0_40px_rgba(255,0,0,0.1)] relative overflow-hidden">
-                    <!-- Background Effects -->
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-ff-red/10 rounded-full blur-[100px] pointer-events-none"></div>
-                    <div class="absolute bottom-0 left-0 w-64 h-64 bg-ff-red/5 rounded-full blur-[100px] pointer-events-none"></div>
-
-                    <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                        <!-- Product Info -->
-                        <div class="text-left">
-                            <h1 class="text-4xl md:text-5xl font-black uppercase mb-4 tracking-wider"><?php echo htmlspecialchars($product['name']); ?></h1>
-                            
-                            <div class="inline-block bg-green-500/10 border border-green-500/20 px-4 py-1.5 rounded-full mb-6">
-                                <span class="text-green-500 font-bold text-sm tracking-wide uppercase flex items-center gap-2">
-                                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_#22c55e]"></span>
-                                    INDETECTADO
-                                </span>
+            <div class="pt-28 pb-16 px-4 sm:px-6 lg:px-8 flex-grow">
+                <div class="max-w-6xl mx-auto w-full">
+                    <div class="reveal" data-reveal>
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-white/60 font-bold">
+                            <a href="/" class="hover:text-white transition">Início</a>
+                            <span class="text-white/30">/</span>
+                            <a href="/#produtos" class="hover:text-white transition">Produtos</a>
+                            <span class="text-white/30">/</span>
+                            <span class="text-white"><?php echo htmlspecialchars($product['name']); ?></span>
+                        </div>
+                        <div class="mt-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                            <div>
+                                <h1 class="text-4xl md:text-5xl font-black tracking-tight uppercase"><?php echo htmlspecialchars($product['name']); ?></h1>
+                                <p class="text-white/60 mt-2 max-w-2xl">Escolha o melhor plano e finalize em segundos.</p>
                             </div>
-
-                            <p class="text-gray-400 text-lg leading-relaxed mb-8">
-                                <?php echo nl2br(htmlspecialchars($product['description'])); ?>
-                            </p>
-
-                            <!-- Features List (Optional, if you want to parse the pipe-separated features) -->
-                            <?php if (!empty($product['features'])): ?>
-                            <div class="flex flex-wrap gap-2 mb-8">
-                                <?php 
-                                $features = explode('|', $product['features']);
-                                foreach ($features as $feature): 
-                                ?>
-                                    <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-gray-300 uppercase tracking-wide">
-                                        <?php echo htmlspecialchars($feature); ?>
-                                    </span>
-                                <?php endforeach; ?>
+                            <div class="flex items-center gap-2">
+                                <?php if ($planCount > 0 && $minPrice !== null): ?>
+                                    <div class="px-4 py-2 rounded-2xl glass">
+                                        <div class="text-[10px] uppercase tracking-[0.22em] text-white/50 font-black">a partir de</div>
+                                        <div class="text-lg font-black">R$ <?php echo number_format((float)$minPrice, 2, ',', '.'); ?></div>
+                                    </div>
+                                <?php endif; ?>
+                                <div class="px-4 py-2 rounded-2xl glass">
+                                    <div class="text-[10px] uppercase tracking-[0.22em] text-white/50 font-black">planos</div>
+                                    <div class="text-lg font-black"><?php echo (int)$planCount; ?></div>
+                                </div>
                             </div>
-                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <div class="xl:col-span-2 rounded-3xl glass glow overflow-hidden relative reveal" data-reveal>
+                            <div class="absolute -top-16 -right-16 w-80 h-80 bg-ff-red/10 rounded-full blur-[120px] pointer-events-none"></div>
+                            <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-white/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+                            <div class="p-6 md:p-8">
+                                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+                                    <div class="lg:col-span-2">
+                                        <div class="rounded-2xl overflow-hidden border border-white/10 bg-black/40">
+                                            <div class="relative h-56 lg:h-80">
+                                                <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="w-full h-full object-cover" loading="lazy">
+                                                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
+                                                <div class="absolute top-4 left-4 flex items-center gap-2">
+                                                    <span class="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-green-500/10 border border-green-500/20 text-green-300">
+                                                        ATIVO
+                                                    </span>
+                                                    <span class="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-white/5 border border-white/10 text-white/80">
+                                                        Entrega rápida
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="lg:col-span-3">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-ff-red/10 border border-ff-red/30 text-red-200">Premium</span>
+                                            <span class="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-white/5 border border-white/10 text-white/70">Suporte</span>
+                                            <span class="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-white/5 border border-white/10 text-white/70">Atualizações</span>
+                                        </div>
+
+                                        <p class="mt-5 text-white/75 leading-relaxed">
+                                            <?php echo nl2br(htmlspecialchars((string)$product['description'])); ?>
+                                        </p>
+
+                                        <?php if (count($featuresTop) > 0): ?>
+                                            <div class="mt-6">
+                                                <div class="text-xs font-black uppercase tracking-[0.22em] text-white/50 mb-3">Recursos</div>
+                                                <div class="flex flex-wrap gap-2">
+                                                    <?php foreach ($featuresTop as $f): ?>
+                                                        <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wide bg-black/40 border border-white/10 text-white/80">
+                                                            <?php echo htmlspecialchars($f); ?>
+                                                        </span>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <div class="mt-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                            <div class="rounded-2xl border border-white/10 bg-black/30 p-4">
+                                                <div class="text-xs text-white/60 font-black uppercase tracking-[0.22em]">Segurança</div>
+                                                <div class="mt-1 font-black">Protegido</div>
+                                            </div>
+                                            <div class="rounded-2xl border border-white/10 bg-black/30 p-4">
+                                                <div class="text-xs text-white/60 font-black uppercase tracking-[0.22em]">Suporte</div>
+                                                <div class="mt-1 font-black">Assistido</div>
+                                            </div>
+                                            <div class="rounded-2xl border border-white/10 bg-black/30 p-4">
+                                                <div class="text-xs text-white/60 font-black uppercase tracking-[0.22em]">Acesso</div>
+                                                <div class="mt-1 font-black">Imediato</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Purchase Options -->
-                        <div class="bg-[#0a0a0a] border border-white/5 rounded-xl p-6 shadow-inner">
-                            <h3 class="text-xl font-bold mb-6 text-white uppercase tracking-wide border-b border-white/10 pb-4">Escolha seu Plano</h3>
-                            
-                            <form id="addToCartForm" method="POST">
+                        <div class="rounded-3xl glass glow p-6 md:p-7 reveal" data-reveal>
+                            <div class="flex items-end justify-between gap-4">
+                                <div>
+                                    <div class="text-lg font-black uppercase tracking-wide">Escolha seu plano</div>
+                                    <div class="text-xs text-white/50 mt-1">Clique em um plano para selecionar</div>
+                                </div>
+                                <?php if ($bestPlanId): ?>
+                                    <div class="px-3 py-1 rounded-full text-xs font-black bg-ff-red/10 border border-ff-red/30 text-red-200">Recomendado</div>
+                                <?php endif; ?>
+                            </div>
+
+                            <form id="addToCartForm" method="POST" class="mt-5">
                                 <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($product['name']); ?>">
-                                <div class="space-y-3 mb-8">
-                                    <?php 
-                                    $first = true;
-                                    while ($plan = $result_plans->fetch_assoc()): 
-                                        $checked = $first ? 'checked' : '';
-                                        $first = false;
-                                    ?>
-                                    <label class="block relative cursor-pointer group">
-                                        <input type="radio" name="plan_id" value="<?php echo $plan['id']; ?>" 
-                                               data-name="<?php echo htmlspecialchars($plan['name']); ?>" 
-                                               data-price="<?php echo $plan['price']; ?>"
-                                               class="peer sr-only" <?php echo $checked; ?>>
-                                        <div class="p-4 rounded-lg bg-[#151515] border border-white/5 peer-checked:border-ff-red peer-checked:bg-ff-red/10 transition-all duration-300 flex justify-between items-center group-hover:border-white/20">
-                                            <span class="font-medium text-gray-300 peer-checked:text-white"><?php echo htmlspecialchars($plan['name']); ?></span>
-                                            <span class="font-bold text-white peer-checked:text-ff-red">R$ <?php echo number_format($plan['price'], 2, ',', '.'); ?></span>
-                                        </div>
-                                    </label>
-                                    <?php endwhile; ?>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <?php foreach ($plans as $idx => $plan): ?>
+                                        <?php
+                                            $pid = (int)$plan['id'];
+                                            $checked = ($pid === $bestPlanId) || ($bestPlanId === 0 && $idx === 0);
+                                            $isBest = ($pid === $bestPlanId);
+                                        ?>
+                                        <label class="block cursor-pointer group">
+                                            <input
+                                                type="radio"
+                                                name="plan_id"
+                                                value="<?php echo $pid; ?>"
+                                                data-name="<?php echo htmlspecialchars((string)$plan['name']); ?>"
+                                                data-price="<?php echo htmlspecialchars((string)$plan['price']); ?>"
+                                                class="peer sr-only"
+                                                <?php echo $checked ? 'checked' : ''; ?>
+                                            >
+                                            <div class="rounded-2xl border border-white/10 bg-black/30 p-4 transition-all duration-300 group-hover:border-white/20 group-hover:-translate-y-0.5 peer-checked:border-ff-red/60 peer-checked:bg-ff-red/10">
+                                                <div class="flex items-start justify-between gap-3">
+                                                    <div>
+                                                        <div class="text-sm font-black"><?php echo htmlspecialchars((string)$plan['name']); ?></div>
+                                                        <?php if ($isBest): ?>
+                                                            <div class="mt-1 text-[10px] font-black uppercase tracking-[0.22em] text-red-200">Mais escolhido</div>
+                                                        <?php else: ?>
+                                                            <div class="mt-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/40">Plano</div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <div class="text-[10px] font-black uppercase tracking-[0.22em] text-white/50">Preço</div>
+                                                        <div class="text-base font-black text-white">R$ <?php echo number_format((float)$plan['price'], 2, ',', '.'); ?></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    <?php endforeach; ?>
                                 </div>
 
-                                <button type="submit" class="w-full bg-ff-red text-white font-black uppercase py-4 rounded-lg hover:bg-red-700 transition-colors tracking-wider shadow-[0_4px_14px_rgba(255,0,0,0.4)] hover:shadow-[0_6px_20px_rgba(255,0,0,0.6)] flex items-center justify-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-                                    ADICIONAR AO CARRINHO
+                                <div class="mt-5 rounded-2xl border border-white/10 bg-black/30 p-4">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div>
+                                            <div class="text-[10px] font-black uppercase tracking-[0.22em] text-white/50">Selecionado</div>
+                                            <div id="selectedPlanName" class="text-sm font-black">—</div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-[10px] font-black uppercase tracking-[0.22em] text-white/50">Total</div>
+                                            <div id="selectedPlanPrice" class="text-lg font-black">R$ 0,00</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="mt-5 w-full bg-ff-red text-white font-black uppercase py-4 rounded-2xl hover:bg-red-700 transition-colors tracking-wider shadow-[0_10px_30px_rgba(255,0,0,0.22)] hover:shadow-[0_14px_40px_rgba(255,0,0,0.32)] flex items-center justify-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                                    Adicionar ao carrinho
                                 </button>
                             </form>
-                            <script>
-                                document.getElementById('addToCartForm').addEventListener('submit', async function(e) {
-                                    e.preventDefault();
-                                    const formData = new FormData(this);
-                                    formData.append('action', 'add');
-                                    
-                                    // Pega os dados do plano selecionado
-                                    const selected = document.querySelector('input[name="plan_id"]:checked');
-                                    if(selected) {
-                                        formData.append('plan_name', selected.dataset.name);
-                                        formData.append('price', selected.dataset.price);
-                                    }
+                        </div>
+                    </div>
 
-                                    try {
-                                        const response = await fetch('/api/cart.php', { method: 'POST', body: formData });
-                                        const data = await response.json();
-                                        if (data.success) {
-                                            if(confirm('Produto adicionado ao carrinho! Ir para o carrinho?')) {
-                                                window.location.href = '/carrinho.php';
-                                            }
-                                        } else {
-                                            alert(data.message);
-                                        }
-                                    } catch (error) { console.error(error); }
-                                });
-                            </script>
+                    <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="rounded-3xl glass p-6 reveal" data-reveal>
+                            <div class="text-sm font-black uppercase tracking-wide">Entrega</div>
+                            <div class="text-white/60 text-sm mt-2">Após o pagamento, o acesso é liberado rapidamente.</div>
+                        </div>
+                        <div class="rounded-3xl glass p-6 reveal" data-reveal>
+                            <div class="text-sm font-black uppercase tracking-wide">Suporte</div>
+                            <div class="text-white/60 text-sm mt-2">Atendimento via Discord e suporte assistido quando necessário.</div>
+                        </div>
+                        <div class="rounded-3xl glass p-6 reveal" data-reveal>
+                            <div class="text-sm font-black uppercase tracking-wide">Atualizações</div>
+                            <div class="text-white/60 text-sm mt-2">Atualizações e manutenção para manter o produto estável.</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-10 rounded-3xl glass p-6 md:p-8 reveal" data-reveal>
+                        <div class="text-lg font-black uppercase tracking-wide">Perguntas rápidas</div>
+                        <div class="mt-5 space-y-3">
+                            <button class="w-full text-left rounded-2xl border border-white/10 bg-black/30 px-4 py-4 hover:bg-black/40 transition" data-acc-btn>
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="font-black">Como recebo o produto?</div>
+                                    <div class="text-white/50 font-black">+</div>
+                                </div>
+                                <div class="hidden mt-3 text-white/60 text-sm leading-relaxed" data-acc-panel>
+                                    Após a compra, você recebe instruções e acesso no canal de suporte/Discord (ou método definido pela loja).
+                                </div>
+                            </button>
+                            <button class="w-full text-left rounded-2xl border border-white/10 bg-black/30 px-4 py-4 hover:bg-black/40 transition" data-acc-btn>
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="font-black">Posso trocar de plano depois?</div>
+                                    <div class="text-white/50 font-black">+</div>
+                                </div>
+                                <div class="hidden mt-3 text-white/60 text-sm leading-relaxed" data-acc-panel>
+                                    Sim. Você pode comprar um plano diferente quando quiser, conforme disponibilidade do produto.
+                                </div>
+                            </button>
+                            <button class="w-full text-left rounded-2xl border border-white/10 bg-black/30 px-4 py-4 hover:bg-black/40 transition" data-acc-btn>
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="font-black">O que está incluso?</div>
+                                    <div class="text-white/50 font-black">+</div>
+                                </div>
+                                <div class="hidden mt-3 text-white/60 text-sm leading-relaxed" data-acc-panel>
+                                    Os recursos inclusos aparecem na lista “Recursos” acima. Em caso de dúvidas, chame o suporte.
+                                </div>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -287,6 +453,92 @@ $result_plans = $conn->query($sql_plans);
                     menu.classList.add('hidden');
                     toggle.setAttribute('aria-expanded', 'false');
                 }
+            });
+        })();
+
+        (function () {
+            const items = document.querySelectorAll('[data-reveal]');
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!items.length) return;
+
+            if (prefersReduced || !('IntersectionObserver' in window)) {
+                items.forEach(el => el.classList.add('is-in'));
+                return;
+            }
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach((e) => {
+                    if (e.isIntersecting) {
+                        e.target.classList.add('is-in');
+                        io.unobserve(e.target);
+                    }
+                });
+            }, { threshold: 0.18 });
+            items.forEach(el => io.observe(el));
+        })();
+
+        (function () {
+            const form = document.getElementById('addToCartForm');
+            const nameEl = document.getElementById('selectedPlanName');
+            const priceEl = document.getElementById('selectedPlanPrice');
+            if (!form) return;
+
+            const fmtMoney = (v) => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            function updateSelected() {
+                const selected = form.querySelector('input[name="plan_id"]:checked');
+                if (!selected) return;
+                if (nameEl) nameEl.textContent = selected.dataset.name || '—';
+                if (priceEl) priceEl.textContent = fmtMoney(selected.dataset.price || 0);
+            }
+
+            form.addEventListener('change', function (e) {
+                const t = e.target;
+                if (t && t.name === 'plan_id') updateSelected();
+            });
+
+            updateSelected();
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                formData.append('action', 'add');
+
+                const selected = form.querySelector('input[name="plan_id"]:checked');
+                if (selected) {
+                    formData.append('plan_name', selected.dataset.name || '');
+                    formData.append('price', selected.dataset.price || '0');
+                }
+
+                try {
+                    const response = await fetch('/api/cart.php', { method: 'POST', body: formData });
+                    const data = await response.json();
+                    if (data.success) {
+                        if (confirm('Produto adicionado ao carrinho! Ir para o carrinho?')) {
+                            window.location.href = '/carrinho.php';
+                        }
+                    } else {
+                        alert(data.message || 'Não foi possível adicionar ao carrinho.');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert('Erro ao adicionar ao carrinho.');
+                }
+            });
+        })();
+
+        (function () {
+            const buttons = Array.from(document.querySelectorAll('[data-acc-btn]'));
+            if (!buttons.length) return;
+
+            buttons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const panel = btn.querySelector('[data-acc-panel]');
+                    const sign = btn.querySelector('div.text-white\\/50');
+                    if (!panel) return;
+                    const isOpen = !panel.classList.contains('hidden');
+                    panel.classList.toggle('hidden', isOpen);
+                    if (sign) sign.textContent = isOpen ? '+' : '—';
+                });
             });
         })();
     </script>

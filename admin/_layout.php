@@ -22,7 +22,7 @@ function render_admin_layout($pageTitle, $activeKey, $contentHtml)
     <html lang="pt-BR">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
         <title><?php echo h($pageTitle); ?> | Admin</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -42,6 +42,10 @@ function render_admin_layout($pageTitle, $activeKey, $contentHtml)
             }
         </script>
         <link rel="icon" type="image/png" href="/logo-thunder.png" />
+        <style>
+            html, body { touch-action: pan-x pan-y; }
+        </style>
+        <script src="/assets/no-zoom.js" defer></script>
     </head>
     <body class="bg-admin-bg text-white min-h-screen">
         <div class="flex min-h-screen">
@@ -161,4 +165,3 @@ function render_admin_layout($pageTitle, $activeKey, $contentHtml)
     </html>
     <?php
 }
-

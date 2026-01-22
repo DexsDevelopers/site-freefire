@@ -5,7 +5,7 @@ session_start();
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Login | Thunder Store</title>
     <!-- <link rel="stylesheet" href="/assets/index-R2RkWoEQ.css"> -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,8 +29,10 @@ session_start();
     </script>
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
     <style>
+        html, body { touch-action: pan-x pan-y; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
     </style>
+    <script src="/assets/no-zoom.js" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
     <!-- Navbar -->
@@ -83,7 +85,7 @@ session_start();
                 </div>
 
                 <div class="flex items-center">
-                    <a href="/#produtos" class="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full flex items-center gap-2 shadow-[0_0_25px_rgba(255,165,0,0.35)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all border border-white/10 hover:border-white/20">
+                    <a href="/#produtos" class="hidden xl:flex bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full items-center gap-2 shadow-[0_0_25px_rgba(255,165,0,0.35)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all border border-white/10 hover:border-white/20">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transform skew-x-[10deg]" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         <span class="transform skew-x-[10deg] text-sm">LOJA</span>
                     </a>

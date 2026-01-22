@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Painel VIP | Thunder Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -79,6 +79,7 @@ if (!isset($_SESSION['user_id'])) {
         }
     </script>
     <style>
+        html, body { touch-action: pan-x pan-y; }
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -102,6 +103,7 @@ if (!isset($_SESSION['user_id'])) {
             }
         }
     </style>
+    <script src="/assets/no-zoom.js" defer></script>
 </head>
 <body class="bg-neutral-950 text-neutral-50 min-h-dvh font-sans antialiased">
     <div class="fixed inset-0 pointer-events-none -z-10">

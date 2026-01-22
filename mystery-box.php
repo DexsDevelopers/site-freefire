@@ -7,7 +7,7 @@ $today = (new DateTime('now', new DateTimeZone('America/Sao_Paulo')))->format('Y
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Mystery Box | Thunder Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -28,11 +28,13 @@ $today = (new DateTime('now', new DateTimeZone('America/Sao_Paulo')))->format('Y
     </script>
     <style>
         html { scroll-behavior: smooth; }
+        html, body { touch-action: pan-x pan-y; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
         @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes shake { 0%,100% { transform: translateX(0) rotate(0deg); } 20% { transform: translateX(-6px) rotate(-2deg); } 40% { transform: translateX(6px) rotate(2deg); } 60% { transform: translateX(-4px) rotate(-1deg); } 80% { transform: translateX(4px) rotate(1deg); } }
         @keyframes pop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
+    <script src="/assets/no-zoom.js" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen">
     <nav class="bg-black/80 backdrop-blur-md border-b border-white/10 fixed w-full z-50 transition-all duration-300 overflow-hidden">
@@ -84,7 +86,7 @@ $today = (new DateTime('now', new DateTimeZone('America/Sao_Paulo')))->format('Y
                 </div>
 
                 <div class="flex items-center">
-                    <a href="/#produtos" class="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full flex items-center gap-2 shadow-[0_0_25px_rgba(255,165,0,0.35)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all border border-white/10 hover:border-white/20">
+                    <a href="/#produtos" class="hidden xl:flex bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full items-center gap-2 shadow-[0_0_25px_rgba(255,165,0,0.35)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all border border-white/10 hover:border-white/20">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transform skew-x-[10deg]" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         <span class="transform skew-x-[10deg] text-sm">LOJA</span>
                     </a>
@@ -133,6 +135,18 @@ $today = (new DateTime('now', new DateTimeZone('America/Sao_Paulo')))->format('Y
                 </div>
                 <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-3">Abra Sua Caixa</h1>
                 <p class="text-gray-400 max-w-2xl">Demonstração visual com 1 abertura por dia (por navegador). Prêmio aparece na hora.</p>
+                <div class="mt-6 w-full max-w-3xl rounded-2xl border border-purple-500/20 bg-purple-500/10 px-5 py-4 text-left">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/25 text-purple-300 text-xs font-black tracking-widest uppercase">Em Breve</div>
+                            <div class="text-white font-bold">Mystery Box com recompensas e saldo</div>
+                        </div>
+                        <div class="text-xs text-gray-400 font-bold tracking-wider uppercase hidden sm:block">Atualização</div>
+                    </div>
+                    <div class="mt-2 text-sm text-gray-300 leading-relaxed">
+                        Estamos preparando a versão oficial da Mystery Box. Por enquanto, esta página é apenas uma prévia visual.
+                    </div>
+                </div>
             </div>
 
             <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
@@ -284,4 +298,3 @@ $today = (new DateTime('now', new DateTimeZone('America/Sao_Paulo')))->format('Y
     </script>
 </body>
 </html>
-

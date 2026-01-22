@@ -205,9 +205,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['run'])) {
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Setup Database | Thunder Store</title>
     <style>
+        html, body { touch-action: pan-x pan-y; }
         body { background-color: #111; color: #eee; font-family: monospace; padding: 20px; line-height: 1.5; }
         .container { max-width: 800px; margin: 0 auto; background: #222; padding: 20px; border-radius: 8px; border: 1px solid #333; }
         h1 { color: #fff; border-bottom: 1px solid #444; padding-bottom: 10px; }
@@ -219,6 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['run'])) {
         .debug { background: #333; padding: 10px; font-size: 12px; border: 1px solid #444; margin-top: 20px; }
         #php-check { color: red; font-weight: bold; font-size: 1.2em; border: 2px dashed red; padding: 20px; text-align: center; background: #fff; }
     </style>
+    <script src="/assets/no-zoom.js" defer></script>
 </head>
 <body>
     

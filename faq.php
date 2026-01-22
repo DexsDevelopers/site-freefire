@@ -6,7 +6,7 @@ session_start();
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>FAQ | Thunder Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -27,9 +27,11 @@ session_start();
     </script>
     <style>
         html { scroll-behavior: smooth; }
+        html, body { touch-action: pan-x pan-y; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
         details[open] summary svg { transform: rotate(180deg); }
     </style>
+    <script src="/assets/no-zoom.js" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen">
     <nav class="bg-black/80 backdrop-blur-md border-b border-white/10 fixed w-full z-50 transition-all duration-300 overflow-hidden">
@@ -81,7 +83,7 @@ session_start();
                 </div>
 
                 <div class="flex items-center">
-                    <a href="/#produtos" class="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full flex items-center gap-2 shadow-[0_0_25px_rgba(255,165,0,0.35)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all border border-white/10 hover:border-white/20">
+                    <a href="/#produtos" class="hidden xl:flex bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full items-center gap-2 shadow-[0_0_25px_rgba(255,165,0,0.35)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all border border-white/10 hover:border-white/20">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transform skew-x-[10deg]" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                         <span class="transform skew-x-[10deg] text-sm">LOJA</span>
                     </a>
@@ -188,4 +190,3 @@ session_start();
     </script>
 </body>
 </html>
-

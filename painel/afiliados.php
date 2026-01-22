@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Afiliados | Thunder Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -25,6 +25,10 @@ if (!isset($_SESSION['user_id'])) {
         }
     </script>
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
+    <style>
+        html, body { touch-action: pan-x pan-y; }
+    </style>
+    <script src="/assets/no-zoom.js" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen font-sans">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -181,4 +185,3 @@ if (!isset($_SESSION['user_id'])) {
     </script>
 </body>
 </html>
-
