@@ -1,20 +1,72 @@
 <?php
 session_start();
-require_once 'api/db.php';
 
-// Busca todos os produtos + métricas de planos
-$sql = "
-    SELECT
-        p.*,
-        COALESCE(MIN(pl.price), 0) AS min_price,
-        COUNT(pl.id) AS plan_count
-    FROM products p
-    LEFT JOIN plans pl ON pl.product_id = p.id
-    WHERE p.status = 'Ativo'
-    GROUP BY p.id
-    ORDER BY p.id DESC
-";
-$result = $conn->query($sql);
+$dbOk = true;
+try {
+    require_once 'api/db.php';
+} catch (Throwable $e) {
+    $dbOk = false;
+}
+
+$products = [];
+
+if ($dbOk && isset($conn)) {
+    $sql = "
+        SELECT
+            p.*,
+            COALESCE(MIN(pl.price), 0) AS min_price,
+            COUNT(pl.id) AS plan_count
+        FROM products p
+        LEFT JOIN plans pl ON pl.product_id = p.id
+        WHERE p.status = 'Ativo'
+        GROUP BY p.id
+        ORDER BY p.id DESC
+    ";
+    $result = $conn->query($sql);
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $products[] = $row;
+        }
+    }
+}
+
+if (!$dbOk || count($products) === 0) {
+    $products = [
+        [
+            'id' => 1,
+            'slug' => 'freefire',
+            'name' => 'FREE FIRE',
+            'description' => 'Funções premium, suporte e atualizações constantes.',
+            'image_url' => '/img/freefire.jpg',
+            'status' => 'Ativo',
+            'features' => 'Chams|Aimbot|No Recoil|AimFov|CameraHack',
+            'min_price' => 15.00,
+            'plan_count' => 4,
+        ],
+        [
+            'id' => 2,
+            'slug' => 'valorant',
+            'name' => 'VALORANT',
+            'description' => 'Monitor premium, performance e estabilidade.',
+            'image_url' => '/img/valorantwall.jpg',
+            'status' => 'Ativo',
+            'features' => 'HGV ON/OFF|Indetectável|No Lag',
+            'min_price' => 20.00,
+            'plan_count' => 4,
+        ],
+        [
+            'id' => 3,
+            'slug' => 'cs2',
+            'name' => 'COUNTER STRIKE 2',
+            'description' => 'Recursos avançados e atualizações rápidas.',
+            'image_url' => '/img/counterstrike2.png',
+            'status' => 'Ativo',
+            'features' => 'Wallhack|Aimbot|Triggerbot|Radar',
+            'min_price' => 15.00,
+            'plan_count' => 3,
+        ],
+    ];
+}
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -249,7 +301,7 @@ $result = $conn->query($sql);
                             Teste sua sorte todos os dias e ganhe moedas, diamantes e itens exclusivos gratuitamente!
                         </p>
                         
-                        <a href="#" class="inline-flex bg-white text-orange-600 hover:bg-orange-50 font-bold py-3 px-8 rounded-full items-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer w-fit">
+                        <a href="/roleta.php" class="inline-flex bg-white text-orange-600 hover:bg-orange-50 font-bold py-3 px-8 rounded-full items-center gap-2 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer w-fit">
                             Experimentar Agora 
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                         </a>
@@ -363,7 +415,7 @@ $result = $conn->query($sql);
             </div>
 
             <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <?php $i = 0; while($product = $result->fetch_assoc()): ?>
+                <?php $i = 0; foreach ($products as $product): ?>
                 <?php
                     $featuresRaw = (string)($product['features'] ?? '');
                     $features = $featuresRaw !== '' ? array_values(array_filter(array_map('trim', explode('|', $featuresRaw)))) : [];
@@ -455,7 +507,7 @@ $result = $conn->query($sql);
                         </div>
                     </div>
                 </div>
-                <?php $i++; endwhile; ?>
+                <?php $i++; endforeach; ?>
             </div>
 
             <div id="noProducts" class="hidden mt-10 rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
