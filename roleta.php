@@ -1,13 +1,14 @@
 <?php
 session_start();
+$today = (new DateTime('now', new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d');
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="/logo-thunder.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Thunder Store</title>
-    <!-- <link rel="stylesheet" href="/assets/index-R2RkWoEQ.css"> -->
+    <title>Roleta | Thunder Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
@@ -27,13 +28,12 @@ session_start();
             }
         }
     </script>
-    <link rel="icon" type="image/png" href="/logo-thunder.png" />
     <style>
+        html { scroll-behavior: smooth; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-black text-white min-h-screen flex flex-col">
-    <!-- Navbar -->
+<body class="bg-black text-white min-h-screen">
     <nav class="bg-black/80 backdrop-blur-md border-b border-white/10 fixed w-full z-50 transition-all duration-300 overflow-hidden">
         <div class="absolute inset-0 pointer-events-none opacity-20"
              style="background-image: url('data:image/svg+xml,%3Csvg width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cpath d=%27M11 11H9v2h2v2h2v-2h2v-2h-2V9h-2v2z%27 fill=%27%23ffffff%27 fill-rule=%27evenodd%27/%3E%3C/svg%3E'); background-size: 42px 42px;">
@@ -55,7 +55,7 @@ session_start();
                             </a>
                         <?php else: ?>
                             <a href="/login.php" class="hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/10" title="Login">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 0 0-7-7z" /></svg>
                             </a>
                         <?php endif; ?>
                     </div>
@@ -66,8 +66,8 @@ session_start();
                 </div>
 
                 <div class="hidden xl:flex items-center gap-6">
-                    <a href="/" class="relative text-white font-bold text-xs tracking-wider transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all hover:after:w-full">INÍCIO</a>
-                    <a href="/roleta.php" class="relative text-yellow-400 font-bold text-xs tracking-wider flex items-center gap-2 hover:text-yellow-300 transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-0 after:bg-yellow-400 after:transition-all hover:after:w-full">
+                    <a href="/" class="relative text-gray-300 hover:text-white font-bold text-xs tracking-wider transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all hover:after:w-full">INÍCIO</a>
+                    <a href="/roleta.php" class="relative text-yellow-400 font-bold text-xs tracking-wider flex items-center gap-2 hover:text-yellow-300 transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-full after:bg-yellow-400 after:transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
                         ROLETA
                     </a>
@@ -123,80 +123,179 @@ session_start();
         </div>
     </nav>
 
-    <div class="flex-grow flex items-center justify-center pt-24 px-4">
-        <div class="max-w-md w-full bg-zinc-900/80 border border-red-900/30 p-8 rounded-xl shadow-2xl backdrop-blur-md">
-            <h2 class="text-3xl font-bold text-center mb-8">Login</h2>
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-400">Email</label>
-                    <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 bg-black border border-red-900/30 rounded-md text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+    <main class="pt-28 pb-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col items-center text-center">
+                <div class="inline-flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/20 px-4 py-2 rounded-full mb-6">
+                    <span class="text-yellow-300 font-bold text-xs tracking-widest uppercase">Roleta Diária</span>
+                    <span class="text-gray-400 text-xs tracking-wide">Hoje: <?php echo htmlspecialchars($today); ?></span>
                 </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-400">Senha</label>
-                    <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 bg-black border border-red-900/30 rounded-md text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
-                </div>
-                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-transform transform hover:scale-105">
-                    Entrar
-                </button>
-            </form>
-            <div class="mt-4 text-center">
-                <p class="text-sm text-gray-400">Não tem uma conta? <a href="/cadastro.php" class="text-red-500 hover:text-red-400">Cadastre-se</a></p>
+                <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-3">Gire e Ganhe Prêmios</h1>
+                <p class="text-gray-400 max-w-2xl">A roleta é uma demonstração visual. Você pode girar 1 vez por dia (por navegador).</p>
             </div>
-            <div id="message" class="mt-4 text-center text-sm font-medium hidden"></div>
+
+            <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                <div class="relative flex items-center justify-center">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                        <div class="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[22px] border-t-red-600 drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
+                    </div>
+                    <div class="relative w-[320px] h-[320px] sm:w-[380px] sm:h-[380px] rounded-full border border-white/10 bg-white/5 shadow-[0_0_50px_rgba(255,0,0,0.08)] overflow-hidden">
+                        <div id="wheel" class="absolute inset-0 origin-center transition-transform duration-[3500ms] ease-out"></div>
+                        <div class="absolute inset-6 rounded-full bg-black/60 border border-white/10"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8">
+                    <div class="flex items-center justify-between gap-4">
+                        <h2 class="text-xl font-black tracking-wider uppercase">Painel</h2>
+                        <div id="cooldown" class="text-xs font-bold text-gray-400"></div>
+                    </div>
+                    <div class="mt-6 space-y-4">
+                        <button id="spin" class="w-full bg-red-600 hover:bg-red-700 disabled:bg-white/10 disabled:text-gray-500 text-white font-black py-4 rounded-xl transition-colors tracking-wider uppercase">
+                            Girar Agora
+                        </button>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-black/50 border border-white/10 rounded-xl p-4">
+                                <div class="text-xs text-gray-400 font-bold tracking-widest uppercase">Último Prêmio</div>
+                                <div id="lastPrize" class="mt-2 text-white font-black">—</div>
+                            </div>
+                            <div class="bg-black/50 border border-white/10 rounded-xl p-4">
+                                <div class="text-xs text-gray-400 font-bold tracking-widest uppercase">Chances</div>
+                                <div class="mt-2 text-white font-black">1 / dia</div>
+                            </div>
+                        </div>
+                        <div class="bg-black/50 border border-white/10 rounded-xl p-4">
+                            <div class="text-xs text-gray-400 font-bold tracking-widest uppercase mb-2">Prêmios Possíveis</div>
+                            <div id="prizeList" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <a href="/#produtos" class="block text-center bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-bold py-3 rounded-xl transition-colors uppercase tracking-wider text-sm">
+                            Ir para a Loja
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            formData.append('action', 'login');
-
-            try {
-                const response = await fetch('/api/auth.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                const msgDiv = document.getElementById('message');
-                msgDiv.textContent = data.message;
-                msgDiv.classList.remove('hidden');
-                
-                if (data.success) {
-                    msgDiv.className = 'mt-4 text-center text-sm font-medium text-green-500';
-                    setTimeout(() => window.location.href = '/', 1500);
-                } else {
-                    msgDiv.className = 'mt-4 text-center text-sm font-medium text-red-500';
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        });
-
         (function () {
             const toggle = document.getElementById('nav-mobile-toggle');
             const menu = document.getElementById('nav-mobile');
-            if (!toggle || !menu) return;
+            if (toggle && menu) {
+                toggle.addEventListener('click', function () {
+                    const isOpen = !menu.classList.contains('hidden');
+                    menu.classList.toggle('hidden', isOpen);
+                    toggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+                });
+                menu.addEventListener('click', function (e) {
+                    const target = e.target;
+                    if (target && target.tagName === 'A') {
+                        menu.classList.add('hidden');
+                        toggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
 
-            toggle.addEventListener('click', function () {
-                const isOpen = !menu.classList.contains('hidden');
-                if (isOpen) {
-                    menu.classList.add('hidden');
-                    toggle.setAttribute('aria-expanded', 'false');
-                } else {
-                    menu.classList.remove('hidden');
-                    toggle.setAttribute('aria-expanded', 'true');
-                }
-            });
+            const prizes = [
+                { label: '💎 50 Diamantes', color: '#dc2626' },
+                { label: '💰 5.000 Moedas', color: '#f59e0b' },
+                { label: '🎁 Mystery Item', color: '#8b5cf6' },
+                { label: '⚡ 10% OFF', color: '#22c55e' },
+                { label: '🎯 Skin Random', color: '#0ea5e9' },
+                { label: '🔥 1 Dia VIP', color: '#ef4444' },
+                { label: '🛡️ Boost', color: '#a3a3a3' },
+                { label: '💎 100 Diamantes', color: '#dc2626' },
+            ];
 
-            menu.addEventListener('click', function (e) {
-                const target = e.target;
-                if (target && target.tagName === 'A') {
-                    menu.classList.add('hidden');
-                    toggle.setAttribute('aria-expanded', 'false');
+            const wheel = document.getElementById('wheel');
+            const spinBtn = document.getElementById('spin');
+            const lastPrize = document.getElementById('lastPrize');
+            const prizeList = document.getElementById('prizeList');
+            const cooldown = document.getElementById('cooldown');
+
+            if (prizeList) {
+                prizes.forEach(p => {
+                    const el = document.createElement('span');
+                    el.className = 'px-3 py-1 rounded-full text-xs font-bold bg-white/5 border border-white/10 text-gray-200';
+                    el.textContent = p.label;
+                    prizeList.appendChild(el);
+                });
+            }
+
+            function buildWheel() {
+                const slices = prizes.length;
+                const sliceDeg = 360 / slices;
+                const parts = prizes.map((p, i) => {
+                    const start = i * sliceDeg;
+                    const end = (i + 1) * sliceDeg;
+                    return `${p.color} ${start}deg ${end}deg`;
+                }).join(', ');
+                wheel.style.background = `conic-gradient(${parts})`;
+                wheel.style.borderRadius = '9999px';
+                wheel.style.filter = 'saturate(1.05) contrast(1.05)';
+
+                const labels = document.createElement('div');
+                labels.className = 'absolute inset-0';
+                prizes.forEach((p, i) => {
+                    const label = document.createElement('div');
+                    label.className = 'absolute left-1/2 top-1/2 text-[11px] sm:text-xs font-black text-white drop-shadow-[0_0_10px_rgba(0,0,0,0.9)] whitespace-nowrap';
+                    const angle = (i * sliceDeg) + sliceDeg / 2;
+                    label.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translate(0, -150px) rotate(90deg)`;
+                    label.textContent = p.label.replace(/ .*/, '');
+                    labels.appendChild(label);
+                });
+                wheel.appendChild(labels);
+            }
+
+            function getLocalKey() {
+                return `thunder_roleta_last_spin_<?php echo htmlspecialchars($today); ?>`;
+            }
+
+            function isLocked() {
+                return localStorage.getItem(getLocalKey()) === '1';
+            }
+
+            function updateCooldown() {
+                if (!cooldown || !spinBtn) return;
+                if (!isLocked()) {
+                    cooldown.textContent = 'Disponível para girar';
+                    spinBtn.disabled = false;
+                    return;
                 }
-            });
+                cooldown.textContent = 'Volte amanhã para girar';
+                spinBtn.disabled = true;
+            }
+
+            let currentRotation = 0;
+            let spinning = false;
+
+            function spin() {
+                if (spinning || isLocked()) return;
+                spinning = true;
+                spinBtn.disabled = true;
+
+                const slices = prizes.length;
+                const sliceDeg = 360 / slices;
+                const chosenIndex = Math.floor(Math.random() * slices);
+                const randomOffset = Math.random() * (sliceDeg * 0.75) - (sliceDeg * 0.375);
+                const target = (360 * 6) + (chosenIndex * sliceDeg) + (sliceDeg / 2) + randomOffset;
+                currentRotation = currentRotation + target;
+                wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+                setTimeout(() => {
+                    const prize = prizes[chosenIndex];
+                    lastPrize.textContent = prize.label;
+                    localStorage.setItem(getLocalKey(), '1');
+                    spinning = false;
+                    updateCooldown();
+                }, 3600);
+            }
+
+            if (spinBtn) spinBtn.addEventListener('click', spin);
+            buildWheel();
+            updateCooldown();
         })();
     </script>
 </body>
 </html>
+

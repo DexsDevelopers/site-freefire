@@ -1,13 +1,14 @@
 <?php
 session_start();
+$today = (new DateTime('now', new DateTimeZone('America/Sao_Paulo')))->format('Y-m-d');
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="/logo-thunder.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Thunder Store</title>
-    <!-- <link rel="stylesheet" href="/assets/index-R2RkWoEQ.css"> -->
+    <title>Mystery Box | Thunder Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
@@ -20,20 +21,20 @@ session_start();
                         'ff-gray': '#1F1F1F',
                         'ff-red': '#DC2626',
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
             }
         }
     </script>
-    <link rel="icon" type="image/png" href="/logo-thunder.png" />
     <style>
+        html { scroll-behavior: smooth; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
+        @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes shake { 0%,100% { transform: translateX(0) rotate(0deg); } 20% { transform: translateX(-6px) rotate(-2deg); } 40% { transform: translateX(6px) rotate(2deg); } 60% { transform: translateX(-4px) rotate(-1deg); } 80% { transform: translateX(4px) rotate(1deg); } }
+        @keyframes pop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
-<body class="bg-black text-white min-h-screen flex flex-col">
-    <!-- Navbar -->
+<body class="bg-black text-white min-h-screen">
     <nav class="bg-black/80 backdrop-blur-md border-b border-white/10 fixed w-full z-50 transition-all duration-300 overflow-hidden">
         <div class="absolute inset-0 pointer-events-none opacity-20"
              style="background-image: url('data:image/svg+xml,%3Csvg width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cpath d=%27M11 11H9v2h2v2h2v-2h2v-2h-2V9h-2v2z%27 fill=%27%23ffffff%27 fill-rule=%27evenodd%27/%3E%3C/svg%3E'); background-size: 42px 42px;">
@@ -51,11 +52,11 @@ session_start();
                         </a>
                         <?php if(isset($_SESSION['user_id'])): ?>
                             <a href="/painel" class="hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/10" title="Perfil">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 0 0-7-7z" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z" /></svg>
                             </a>
                         <?php else: ?>
                             <a href="/login.php" class="hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/10" title="Login">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z" /></svg>
                             </a>
                         <?php endif; ?>
                     </div>
@@ -66,7 +67,7 @@ session_start();
                 </div>
 
                 <div class="hidden xl:flex items-center gap-6">
-                    <a href="/" class="relative text-white font-bold text-xs tracking-wider transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all hover:after:w-full">INÍCIO</a>
+                    <a href="/" class="relative text-gray-300 hover:text-white font-bold text-xs tracking-wider transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all hover:after:w-full">INÍCIO</a>
                     <a href="/roleta.php" class="relative text-yellow-400 font-bold text-xs tracking-wider flex items-center gap-2 hover:text-yellow-300 transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-0 after:bg-yellow-400 after:transition-all hover:after:w-full">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
                         ROLETA
@@ -75,7 +76,7 @@ session_start();
                     <a href="/termos.php" class="relative text-gray-300 hover:text-white font-bold text-xs tracking-wider transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all hover:after:w-full">TERMOS</a>
                     <a href="/demo.php" class="relative text-gray-300 hover:text-white font-bold text-xs tracking-wider transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all hover:after:w-full">DEMONSTRAÇÃO</a>
                     <a href="/faq.php" class="relative text-gray-300 hover:text-white font-bold text-xs tracking-wider transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all hover:after:w-full">FAQ</a>
-                    <a href="/mystery-box.php" class="relative text-purple-500 font-bold text-xs tracking-wider flex items-center gap-2 hover:text-purple-400 transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-0 after:bg-purple-500 after:transition-all hover:after:w-full">
+                    <a href="/mystery-box.php" class="relative text-purple-500 font-bold text-xs tracking-wider flex items-center gap-2 hover:text-purple-400 transition-colors after:content-[''] after:absolute after:-bottom-2 after:left-0 after:h-[2px] after:w-full after:bg-purple-500 after:transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         MYSTERY BOX
                     </a>
@@ -102,7 +103,7 @@ session_start();
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
                             Roleta
                         </a>
-                        <a href="/mystery-box.php" class="px-4 py-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/15 text-purple-300 font-bold text-xs tracking-wider uppercase transition-colors flex items-center gap-2">
+                        <a href="/mystery-box.php" class="px-4 py-3 rounded-xl bg-purple-500/15 hover:bg-purple-500/20 text-purple-200 font-bold text-xs tracking-wider uppercase transition-colors flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                             Mystery Box
                         </a>
@@ -123,80 +124,164 @@ session_start();
         </div>
     </nav>
 
-    <div class="flex-grow flex items-center justify-center pt-24 px-4">
-        <div class="max-w-md w-full bg-zinc-900/80 border border-red-900/30 p-8 rounded-xl shadow-2xl backdrop-blur-md">
-            <h2 class="text-3xl font-bold text-center mb-8">Login</h2>
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-400">Email</label>
-                    <input type="email" id="email" name="email" required class="mt-1 block w-full px-3 py-2 bg-black border border-red-900/30 rounded-md text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
+    <main class="pt-28 pb-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col items-center text-center">
+                <div class="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 px-4 py-2 rounded-full mb-6">
+                    <span class="text-purple-300 font-bold text-xs tracking-widest uppercase">Mystery Box</span>
+                    <span class="text-gray-400 text-xs tracking-wide">Hoje: <?php echo htmlspecialchars($today); ?></span>
                 </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-400">Senha</label>
-                    <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 bg-black border border-red-900/30 rounded-md text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors">
-                </div>
-                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-transform transform hover:scale-105">
-                    Entrar
-                </button>
-            </form>
-            <div class="mt-4 text-center">
-                <p class="text-sm text-gray-400">Não tem uma conta? <a href="/cadastro.php" class="text-red-500 hover:text-red-400">Cadastre-se</a></p>
+                <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-3">Abra Sua Caixa</h1>
+                <p class="text-gray-400 max-w-2xl">Demonstração visual com 1 abertura por dia (por navegador). Prêmio aparece na hora.</p>
             </div>
-            <div id="message" class="mt-4 text-center text-sm font-medium hidden"></div>
+
+            <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                <div class="flex items-center justify-center">
+                    <div class="relative w-[320px] h-[320px] sm:w-[380px] sm:h-[380px] flex items-center justify-center">
+                        <div class="absolute inset-0 bg-purple-500/10 rounded-full blur-[80px]"></div>
+                        <div id="box" class="relative w-64 h-64 rounded-3xl bg-gradient-to-b from-purple-600/20 to-black border border-purple-500/30 shadow-[0_0_40px_rgba(168,85,247,0.25)] flex items-center justify-center" style="animation: floaty 4s ease-in-out infinite;">
+                            <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-44 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/30"></div>
+                            <div class="w-36 h-36 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center">
+                                <span class="text-6xl">🎁</span>
+                            </div>
+                            <div class="absolute bottom-5 left-1/2 -translate-x-1/2 text-xs font-black tracking-widest text-purple-200 uppercase">Thunder</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8">
+                    <div class="flex items-center justify-between gap-4">
+                        <h2 class="text-xl font-black tracking-wider uppercase">Recompensas</h2>
+                        <div id="cooldown" class="text-xs font-bold text-gray-400"></div>
+                    </div>
+                    <div class="mt-6 space-y-4">
+                        <button id="openBox" class="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-white/10 disabled:text-gray-500 text-white font-black py-4 rounded-xl transition-colors tracking-wider uppercase">
+                            Abrir Agora
+                        </button>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-black/50 border border-white/10 rounded-xl p-4">
+                                <div class="text-xs text-gray-400 font-bold tracking-widest uppercase">Último Prêmio</div>
+                                <div id="lastReward" class="mt-2 text-white font-black">—</div>
+                            </div>
+                            <div class="bg-black/50 border border-white/10 rounded-xl p-4">
+                                <div class="text-xs text-gray-400 font-bold tracking-widest uppercase">Chances</div>
+                                <div class="mt-2 text-white font-black">1 / dia</div>
+                            </div>
+                        </div>
+                        <div class="bg-black/50 border border-white/10 rounded-xl p-4">
+                            <div class="text-xs text-gray-400 font-bold tracking-widest uppercase mb-2">Itens</div>
+                            <div id="rewardList" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <a href="/#produtos" class="block text-center bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-bold py-3 rounded-xl transition-colors uppercase tracking-wider text-sm">
+                            Ir para a Loja
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
+        <div class="bg-black/80 border border-white/10 backdrop-blur-md rounded-2xl px-5 py-3 shadow-[0_0_30px_rgba(168,85,247,0.2)]" style="animation: pop 220ms ease-out;">
+            <div id="toastText" class="text-white font-black"></div>
         </div>
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            formData.append('action', 'login');
-
-            try {
-                const response = await fetch('/api/auth.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                const msgDiv = document.getElementById('message');
-                msgDiv.textContent = data.message;
-                msgDiv.classList.remove('hidden');
-                
-                if (data.success) {
-                    msgDiv.className = 'mt-4 text-center text-sm font-medium text-green-500';
-                    setTimeout(() => window.location.href = '/', 1500);
-                } else {
-                    msgDiv.className = 'mt-4 text-center text-sm font-medium text-red-500';
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-            }
-        });
-
         (function () {
             const toggle = document.getElementById('nav-mobile-toggle');
             const menu = document.getElementById('nav-mobile');
-            if (!toggle || !menu) return;
+            if (toggle && menu) {
+                toggle.addEventListener('click', function () {
+                    const isOpen = !menu.classList.contains('hidden');
+                    menu.classList.toggle('hidden', isOpen);
+                    toggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+                });
+                menu.addEventListener('click', function (e) {
+                    const target = e.target;
+                    if (target && target.tagName === 'A') {
+                        menu.classList.add('hidden');
+                        toggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
 
-            toggle.addEventListener('click', function () {
-                const isOpen = !menu.classList.contains('hidden');
-                if (isOpen) {
-                    menu.classList.add('hidden');
-                    toggle.setAttribute('aria-expanded', 'false');
-                } else {
-                    menu.classList.remove('hidden');
-                    toggle.setAttribute('aria-expanded', 'true');
-                }
-            });
+            const rewards = [
+                { label: '💎 30 Diamantes' },
+                { label: '💎 60 Diamantes' },
+                { label: '💰 2.000 Moedas' },
+                { label: '🎟️ Cupom 5%' },
+                { label: '🎟️ Cupom 10%' },
+                { label: '⭐ Item Raro' },
+                { label: '🧩 Item Aleatório' },
+                { label: '🎁 Caixa Extra' },
+            ];
 
-            menu.addEventListener('click', function (e) {
-                const target = e.target;
-                if (target && target.tagName === 'A') {
-                    menu.classList.add('hidden');
-                    toggle.setAttribute('aria-expanded', 'false');
+            const rewardList = document.getElementById('rewardList');
+            const openBtn = document.getElementById('openBox');
+            const box = document.getElementById('box');
+            const lastReward = document.getElementById('lastReward');
+            const cooldown = document.getElementById('cooldown');
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+
+            if (rewardList) {
+                rewards.forEach(r => {
+                    const el = document.createElement('span');
+                    el.className = 'px-3 py-1 rounded-full text-xs font-bold bg-white/5 border border-white/10 text-gray-200';
+                    el.textContent = r.label;
+                    rewardList.appendChild(el);
+                });
+            }
+
+            function key() {
+                return `thunder_mystery_last_open_<?php echo htmlspecialchars($today); ?>`;
+            }
+            function isLocked() {
+                return localStorage.getItem(key()) === '1';
+            }
+            function update() {
+                if (!cooldown || !openBtn) return;
+                if (!isLocked()) {
+                    cooldown.textContent = 'Disponível para abrir';
+                    openBtn.disabled = false;
+                    return;
                 }
-            });
+                cooldown.textContent = 'Volte amanhã para abrir';
+                openBtn.disabled = true;
+            }
+            function showToast(text) {
+                if (!toast || !toastText) return;
+                toastText.textContent = text;
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 2600);
+            }
+
+            let opening = false;
+            function open() {
+                if (opening || isLocked()) return;
+                opening = true;
+                openBtn.disabled = true;
+
+                if (box) {
+                    box.style.animation = 'shake 550ms ease-in-out';
+                }
+
+                setTimeout(() => {
+                    const chosen = rewards[Math.floor(Math.random() * rewards.length)];
+                    lastReward.textContent = chosen.label;
+                    localStorage.setItem(key(), '1');
+                    showToast(`Você ganhou: ${chosen.label}`);
+                    opening = false;
+                    if (box) box.style.animation = 'floaty 4s ease-in-out infinite';
+                    update();
+                }, 650);
+            }
+
+            if (openBtn) openBtn.addEventListener('click', open);
+            update();
         })();
     </script>
 </body>
 </html>
+

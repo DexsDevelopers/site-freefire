@@ -1,8 +1,49 @@
 <?php
+$secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.use_strict_mode', '1');
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_samesite', 'Lax');
+if ($secure) {
+    ini_set('session.cookie_secure', '1');
+}
 session_start();
+
+header('X-Frame-Options: SAMEORIGIN');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
 require_once 'db.php';
 
 header('Content-Type: application/json');
+
+$hasRole = false;
+$hasReferredBy = false;
+$hasAffiliateTables = false;
+
+function db_has_column(mysqli $conn, $table, $column)
+{
+    $sql = "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $table, $column);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    return ((int)($row['c'] ?? 0)) > 0;
+}
+
+function db_has_table(mysqli $conn, $table)
+{
+    $sql = "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $table);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    return ((int)($row['c'] ?? 0)) > 0;
+}
+
+$hasRole = db_has_column($conn, 'users', 'role');
+$hasReferredBy = db_has_column($conn, 'users', 'referred_by');
+$hasAffiliateTables = db_has_table($conn, 'affiliate_accounts') && db_has_table($conn, 'affiliate_referrals');
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
@@ -26,15 +67,35 @@ if ($action === 'register') {
     }
 
     $password_hash = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $name, $email, $password_hash);
+    $affiliate_user_id = (int)($_SESSION['affiliate_user_id'] ?? 0);
+
+    if ($hasReferredBy && $affiliate_user_id > 0) {
+        $stmt = $conn->prepare("INSERT INTO users (name, email, password, referred_by) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("sssi", $name, $email, $password_hash, $affiliate_user_id);
+    } else {
+        $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $name, $email, $password_hash);
+    }
 
     if ($stmt->execute()) {
-        $_SESSION['user_id'] = $stmt->insert_id;
+        session_regenerate_id(true);
+        $newUserId = (int)$stmt->insert_id;
+        $_SESSION['user_id'] = $newUserId;
         $_SESSION['user_name'] = $name;
+        if ($hasRole) {
+            $_SESSION['user_role'] = 'user';
+            $_SESSION['is_admin'] = false;
+        }
+
+        if ($hasAffiliateTables && $affiliate_user_id > 0 && $affiliate_user_id !== $newUserId) {
+            $stmt2 = $conn->prepare("INSERT IGNORE INTO affiliate_referrals (affiliate_user_id, referred_user_id) VALUES (?, ?)");
+            $stmt2->bind_param("ii", $affiliate_user_id, $newUserId);
+            $stmt2->execute();
+        }
+
         echo json_encode(['success' => true, 'message' => 'Cadastro realizado com sucesso!']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar: ' . $conn->error]);
+        echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar.']);
     }
 } elseif ($action === 'login') {
     $email = $_POST['email'] ?? '';
@@ -45,15 +106,22 @@ if ($action === 'register') {
         exit;
     }
 
-    $stmt = $conn->prepare("SELECT id, name, password FROM users WHERE email = ?");
+    $stmt = $hasRole
+        ? $conn->prepare("SELECT id, name, password, role FROM users WHERE email = ?")
+        : $conn->prepare("SELECT id, name, password FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($row = $result->fetch_assoc()) {
         if (password_verify($password, $row['password'])) {
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['user_name'] = $row['name'];
+            if ($hasRole) {
+                $_SESSION['user_role'] = (string)($row['role'] ?? 'user');
+                $_SESSION['is_admin'] = ($_SESSION['user_role'] === 'admin');
+            }
             echo json_encode(['success' => true, 'message' => 'Login realizado com sucesso!']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Senha incorreta.']);

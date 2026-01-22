@@ -26,6 +26,137 @@ try {
 $sql_file = 'database.sql';
 $import_status = "";
 $import_details = "";
+$generated_admin = null;
+
+function db_has_column(mysqli $conn, $table, $column)
+{
+    $sql = "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $table, $column);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    return ((int)($row['c'] ?? 0)) > 0;
+}
+
+function db_has_table(mysqli $conn, $table)
+{
+    $sql = "SELECT COUNT(*) AS c FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $table);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    return ((int)($row['c'] ?? 0)) > 0;
+}
+
+function ensure_admin_schema(mysqli $conn)
+{
+    if (db_has_column($conn, 'users', 'role') === false) {
+        $conn->query("ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'user'");
+    }
+    if (db_has_column($conn, 'users', 'referred_by') === false) {
+        $conn->query("ALTER TABLE users ADD COLUMN referred_by INT NULL");
+        $conn->query("ALTER TABLE users ADD CONSTRAINT fk_users_referred_by FOREIGN KEY (referred_by) REFERENCES users(id) ON DELETE SET NULL");
+    }
+    if (db_has_column($conn, 'orders', 'affiliate_user_id') === false) {
+        $conn->query("ALTER TABLE orders ADD COLUMN affiliate_user_id INT NULL");
+        $conn->query("ALTER TABLE orders ADD CONSTRAINT fk_orders_affiliate_user FOREIGN KEY (affiliate_user_id) REFERENCES users(id) ON DELETE SET NULL");
+    }
+
+    $conn->query("CREATE TABLE IF NOT EXISTS app_settings (
+        `key` VARCHAR(100) PRIMARY KEY,
+        `value` TEXT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+
+    $conn->query("CREATE TABLE IF NOT EXISTS affiliate_accounts (
+        user_id INT PRIMARY KEY,
+        code VARCHAR(32) NOT NULL UNIQUE,
+        commission_rate DECIMAL(5,4) NOT NULL DEFAULT 0.1000,
+        status VARCHAR(20) NOT NULL DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )");
+
+    $conn->query("CREATE TABLE IF NOT EXISTS affiliate_clicks (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        affiliate_user_id INT NOT NULL,
+        code VARCHAR(32) NOT NULL,
+        ip_hash CHAR(64) NOT NULL,
+        user_agent VARCHAR(255) NULL,
+        referer VARCHAR(255) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_aff_clicks_user (affiliate_user_id),
+        INDEX idx_aff_clicks_code (code),
+        FOREIGN KEY (affiliate_user_id) REFERENCES users(id) ON DELETE CASCADE
+    )");
+
+    $conn->query("CREATE TABLE IF NOT EXISTS affiliate_referrals (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        affiliate_user_id INT NOT NULL,
+        referred_user_id INT NOT NULL UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_aff_ref_user (affiliate_user_id),
+        FOREIGN KEY (affiliate_user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (referred_user_id) REFERENCES users(id) ON DELETE CASCADE
+    )");
+
+    $conn->query("CREATE TABLE IF NOT EXISTS affiliate_commissions (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        affiliate_user_id INT NOT NULL,
+        order_id INT NOT NULL UNIQUE,
+        amount DECIMAL(10,2) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_aff_comm_user (affiliate_user_id),
+        FOREIGN KEY (affiliate_user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+    )");
+
+    $conn->query("CREATE TABLE IF NOT EXISTS affiliate_payouts (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        affiliate_user_id INT NOT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        method VARCHAR(50) NOT NULL DEFAULT 'pix',
+        destination VARCHAR(255) NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'requested',
+        note VARCHAR(255) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        processed_at TIMESTAMP NULL,
+        INDEX idx_aff_payout_user (affiliate_user_id),
+        INDEX idx_aff_payout_status (status),
+        FOREIGN KEY (affiliate_user_id) REFERENCES users(id) ON DELETE CASCADE
+    )");
+
+    $defaults = [
+        ['affiliate_default_rate', '0.10'],
+        ['affiliate_payout_min', '50.00'],
+    ];
+    foreach ($defaults as $row) {
+        $stmt = $conn->prepare("INSERT IGNORE INTO app_settings (`key`,`value`) VALUES (?,?)");
+        $stmt->bind_param("ss", $row[0], $row[1]);
+        $stmt->execute();
+    }
+}
+
+function ensure_first_admin(mysqli $conn)
+{
+    if (!db_has_column($conn, 'users', 'role')) {
+        return null;
+    }
+    $res = $conn->query("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
+    if ($res && $res->num_rows > 0) {
+        return null;
+    }
+    $email = 'admin@thunder.local';
+    $password_plain = bin2hex(random_bytes(6));
+    $name = 'Administrador';
+    $hash = password_hash($password_plain, PASSWORD_DEFAULT);
+    $stmt = $conn->prepare("INSERT INTO users (name,email,password,role) VALUES (?,?,?,'admin') ON DUPLICATE KEY UPDATE role='admin'");
+    $stmt->bind_param("sss", $name, $email, $hash);
+    $stmt->execute();
+    return ['email' => $email, 'password' => $password_plain];
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['run'])) {
     if (!file_exists($sql_file)) {
@@ -56,7 +187,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['run'])) {
                 } while ($conn->more_results() && $conn->next_result());
                 
                 $import_status = "success";
+                ensure_admin_schema($conn);
+                $generated_admin = ensure_first_admin($conn);
                 $import_details = "Importação concluída! $results comandos processados.";
+                if ($generated_admin) {
+                    $import_details .= " Admin criado: " . $generated_admin['email'] . " senha: " . $generated_admin['password'];
+                }
             } else {
                 $import_status = "error";
                 $import_details = "Erro MySQL: " . $conn->error;
