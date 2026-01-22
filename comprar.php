@@ -59,18 +59,65 @@ $result_plans = $conn->query($sql_plans);
     <div id="root">
         <div class="min-h-screen flex flex-col bg-black text-white selection:bg-ff-red selection:text-white overflow-x-hidden">
             <!-- Navbar -->
-            <nav class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="bg-black/90 backdrop-blur-sm border-b border-white/5 fixed w-full z-50 transition-all duration-300">
+                <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex items-center justify-between h-20">
-                        <a class="flex-shrink-0 flex items-center gap-2 group cursor-pointer" href="/">
-                            <img src="/logo-thunder.png" alt="Thunder Store Logo" class="h-10 w-auto group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_8px_rgba(255,0,0,0.5)]">
-                            <span class="font-black text-xl tracking-wider text-white group-hover:text-ff-red transition-colors duration-300">THUNDER STORE</span>
-                        </a>
-                        <div class="hidden md:block">
-                            <div class="ml-10 flex items-baseline space-x-8">
-                                <a class="text-gray-300 hover:text-ff-red hover:scale-110 transition-all duration-300 px-3 py-2 rounded-md text-sm font-bold uppercase tracking-wide" href="/">Início</a>
-                                <a class="text-gray-300 hover:text-ff-red hover:scale-110 transition-all duration-300 px-3 py-2 rounded-md text-sm font-bold uppercase tracking-wide" href="/#produtos">Produtos</a>
+                        <!-- Left: Icons + Logo -->
+                        <div class="flex items-center gap-6">
+                            <!-- Icons -->
+                            <div class="flex items-center gap-4 text-gray-400">
+                                <a href="https://discord.gg/seuservidor" target="_blank" class="hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037 14.12 14.12 0 0 0-.624 1.282 18.336 18.336 0 0 0-5.46 0 14.137 14.137 0 0 0-.623-1.282.074.074 0 0 0-.08-.037 19.782 19.782 0 0 0-4.885 1.515.066.066 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.956 2.42-2.157 2.42zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.946 2.42-2.157 2.42z"/></svg>
+                                </a>
+                                <a href="/carrinho.php" class="hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/10 relative">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                </a>
+                                <?php if(isset($_SESSION['user_id'])): ?>
+                                    <a href="/painel" class="hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/10" title="Perfil">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                    </a>
+                                <?php else: ?>
+                                    <a href="/login.php" class="hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/10" title="Login">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                    </a>
+                                <?php endif; ?>
                             </div>
+                            <!-- Divider -->
+                            <div class="h-8 w-px bg-white/10 hidden sm:block"></div>
+                            <!-- Logo -->
+                            <a href="/" class="flex-shrink-0">
+                                 <img src="/logo-thunder.png" alt="Thunder Store" class="h-10 w-auto object-contain">
+                            </a>
+                        </div>
+        
+                        <!-- Center: Links -->
+                        <div class="hidden xl:flex items-center gap-6">
+                            <a href="/" class="text-white font-bold text-xs tracking-wider hover:text-red-500 transition-colors">INÍCIO</a>
+                            <a href="#" class="text-yellow-400 font-bold text-xs tracking-wider flex items-center gap-2 hover:text-yellow-300 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+                                ROLETA
+                            </a>
+                            <a href="#" class="text-gray-300 hover:text-white font-bold text-xs tracking-wider transition-colors">STATUS</a>
+                            <a href="#" class="text-gray-300 hover:text-white font-bold text-xs tracking-wider transition-colors">TERMOS</a>
+                            <a href="#" class="text-gray-300 hover:text-white font-bold text-xs tracking-wider transition-colors">DEMONSTRAÇÃO</a>
+                            <a href="#" class="text-gray-300 hover:text-white font-bold text-xs tracking-wider transition-colors">FAQ</a>
+                            <a href="#" class="text-purple-500 font-bold text-xs tracking-wider flex items-center gap-2 hover:text-purple-400 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                MYSTERY BOX
+                            </a>
+                        </div>
+        
+                        <!-- Right: Loja Button -->
+                        <div class="flex items-center">
+                             <a href="/#produtos" class="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-black italic px-6 py-2 rounded-full flex items-center gap-2 shadow-[0_0_15px_rgba(255,165,0,0.3)] transform skew-x-[-10deg] hover:skew-x-[-10deg] hover:scale-105 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transform skew-x-[10deg]" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                <span class="transform skew-x-[10deg] text-sm">LOJA</span>
+                             </a>
+                             
+                             <!-- Mobile Menu Button -->
+                             <button class="ml-4 xl:hidden text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                             </button>
                         </div>
                     </div>
                 </div>
