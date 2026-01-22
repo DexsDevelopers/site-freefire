@@ -99,7 +99,8 @@ $result_plans = $conn->query($sql_plans);
                         <div class="bg-[#0a0a0a] border border-white/5 rounded-xl p-6 shadow-inner">
                             <h3 class="text-xl font-bold mb-6 text-white uppercase tracking-wide border-b border-white/10 pb-4">Escolha seu Plano</h3>
                             
-                            <form action="#" method="POST"> <!-- Placeholder for future payment integration -->
+                            <form id="addToCartForm" method="POST">
+                                <input type="hidden" name="product_name" value="<?php echo htmlspecialchars($product['name']); ?>">
                                 <div class="space-y-3 mb-8">
                                     <?php 
                                     $first = true;
@@ -108,7 +109,10 @@ $result_plans = $conn->query($sql_plans);
                                         $first = false;
                                     ?>
                                     <label class="block relative cursor-pointer group">
-                                        <input type="radio" name="plan" value="<?php echo $plan['id']; ?>" class="peer sr-only" <?php echo $checked; ?>>
+                                        <input type="radio" name="plan_id" value="<?php echo $plan['id']; ?>" 
+                                               data-name="<?php echo htmlspecialchars($plan['name']); ?>" 
+                                               data-price="<?php echo $plan['price']; ?>"
+                                               class="peer sr-only" <?php echo $checked; ?>>
                                         <div class="p-4 rounded-lg bg-[#151515] border border-white/5 peer-checked:border-ff-red peer-checked:bg-ff-red/10 transition-all duration-300 flex justify-between items-center group-hover:border-white/20">
                                             <span class="font-medium text-gray-300 peer-checked:text-white"><?php echo htmlspecialchars($plan['name']); ?></span>
                                             <span class="font-bold text-white peer-checked:text-ff-red">R$ <?php echo number_format($plan['price'], 2, ',', '.'); ?></span>
@@ -117,11 +121,37 @@ $result_plans = $conn->query($sql_plans);
                                     <?php endwhile; ?>
                                 </div>
 
-                                <button type="button" onclick="alert('Sistema de pagamento em breve!')" class="w-full bg-ff-red text-white font-black uppercase py-4 rounded-lg hover:bg-red-700 transition-colors tracking-wider shadow-[0_4px_14px_rgba(255,0,0,0.4)] hover:shadow-[0_6px_20px_rgba(255,0,0,0.6)] flex items-center justify-center gap-2">
+                                <button type="submit" class="w-full bg-ff-red text-white font-black uppercase py-4 rounded-lg hover:bg-red-700 transition-colors tracking-wider shadow-[0_4px_14px_rgba(255,0,0,0.4)] hover:shadow-[0_6px_20px_rgba(255,0,0,0.6)] flex items-center justify-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-                                    COMPRAR AGORA
+                                    ADICIONAR AO CARRINHO
                                 </button>
                             </form>
+                            <script>
+                                document.getElementById('addToCartForm').addEventListener('submit', async function(e) {
+                                    e.preventDefault();
+                                    const formData = new FormData(this);
+                                    formData.append('action', 'add');
+                                    
+                                    // Pega os dados do plano selecionado
+                                    const selected = document.querySelector('input[name="plan_id"]:checked');
+                                    if(selected) {
+                                        formData.append('plan_name', selected.dataset.name);
+                                        formData.append('price', selected.dataset.price);
+                                    }
+
+                                    try {
+                                        const response = await fetch('/api/cart.php', { method: 'POST', body: formData });
+                                        const data = await response.json();
+                                        if (data.success) {
+                                            if(confirm('Produto adicionado ao carrinho! Ir para o carrinho?')) {
+                                                window.location.href = '/carrinho.php';
+                                            }
+                                        } else {
+                                            alert(data.message);
+                                        }
+                                    } catch (error) { console.error(error); }
+                                });
+                            </script>
                         </div>
                     </div>
                 </div>
