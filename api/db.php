@@ -1,7 +1,7 @@
 <?php
 // Configurações do banco de dados
 $db_host = 'localhost';
-$db_user = 'u853242961_only';
+$db_user = 'u853242961_only2';
 $db_pass = 'Lucastav8012@';
 $db_name = 'u853242961_only';
 
