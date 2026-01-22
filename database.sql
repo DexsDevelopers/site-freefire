@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS plans (
     product_id INT NOT NULL,
     name VARCHAR(50) NOT NULL, -- Diário, Semanal, etc.
     price DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_plan (product_id, name)
 );
 
 -- Tabela de Usuários
@@ -59,7 +60,8 @@ INSERT INTO plans (product_id, name, price) VALUES
 (@ff_id, 'Diário', 15.00),
 (@ff_id, 'Semanal', 30.00),
 (@ff_id, 'Mensal', 60.00),
-(@ff_id, 'Permanente', 160.00);
+(@ff_id, 'Permanente', 160.00)
+ON DUPLICATE KEY UPDATE price=VALUES(price);
 
 
 -- 2. Valorant
@@ -72,7 +74,8 @@ INSERT INTO plans (product_id, name, price) VALUES
 (@val_id, 'Diário', 20.00),
 (@val_id, 'Semanal', 50.00),
 (@val_id, 'Mensal', 90.00),
-(@val_id, 'Permanente', 250.00);
+(@val_id, 'Permanente', 250.00)
+ON DUPLICATE KEY UPDATE price=VALUES(price);
 
 
 -- 3. Counter Strike 2
@@ -84,7 +87,8 @@ SET @cs2_id = (SELECT id FROM products WHERE slug = 'cs2');
 INSERT INTO plans (product_id, name, price) VALUES 
 (@cs2_id, 'Diário', 15.00),
 (@cs2_id, 'Semanal', 35.00),
-(@cs2_id, 'Mensal', 70.00);
+(@cs2_id, 'Mensal', 70.00)
+ON DUPLICATE KEY UPDATE price=VALUES(price);
 
 
 -- 4. Fortnite
@@ -96,7 +100,8 @@ SET @fn_id = (SELECT id FROM products WHERE slug = 'fortnite');
 INSERT INTO plans (product_id, name, price) VALUES 
 (@fn_id, 'Diário', 18.00),
 (@fn_id, 'Semanal', 45.00),
-(@fn_id, 'Mensal', 85.00);
+(@fn_id, 'Mensal', 85.00)
+ON DUPLICATE KEY UPDATE price=VALUES(price);
 
 
 -- 5. Call of Duty
@@ -108,7 +113,8 @@ SET @cod_id = (SELECT id FROM products WHERE slug = 'cod');
 INSERT INTO plans (product_id, name, price) VALUES 
 (@cod_id, 'Diário', 20.00),
 (@cod_id, 'Semanal', 50.00),
-(@cod_id, 'Mensal', 100.00);
+(@cod_id, 'Mensal', 100.00)
+ON DUPLICATE KEY UPDATE price=VALUES(price);
 
 
 -- 6. GTA V (FiveM)
@@ -120,7 +126,8 @@ SET @fivem_id = (SELECT id FROM products WHERE slug = 'fivem');
 INSERT INTO plans (product_id, name, price) VALUES 
 (@fivem_id, 'Semanal', 40.00),
 (@fivem_id, 'Mensal', 80.00),
-(@fivem_id, 'Lifetime', 200.00);
+(@fivem_id, 'Lifetime', 200.00)
+ON DUPLICATE KEY UPDATE price=VALUES(price);
 
 
 -- 7. Marvel Rivals
@@ -132,4 +139,5 @@ SET @marvel_id = (SELECT id FROM products WHERE slug = 'marvel');
 INSERT INTO plans (product_id, name, price) VALUES 
 (@marvel_id, 'Diário', 15.00),
 (@marvel_id, 'Semanal', 35.00),
-(@marvel_id, 'Mensal', 70.00);
+(@marvel_id, 'Mensal', 70.00)
+ON DUPLICATE KEY UPDATE price=VALUES(price);
