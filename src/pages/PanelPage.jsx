@@ -112,7 +112,8 @@ const PanelPage = () => {
         </div>
 
         {/* Content Area */}
-        <div className="flex-grow p-8 md:p-12 relative bg-[url('/img/grid.png')] bg-repeat opacity-90">
+        <div className="flex-grow p-8 md:p-12 relative bg-[#111] opacity-90">
+          <div className="absolute inset-0 bg-[radial-gradient(#ff0000_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none"></div>
           <div className="absolute inset-0 bg-gradient-to-br from-ff-red/5 to-transparent pointer-events-none"></div>
           
           {/* Header for current tab */}
