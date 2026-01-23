@@ -205,7 +205,7 @@ ob_start();
                 </label>
                 <div class="rounded-xl border border-admin-border bg-black/30 p-4">
                     <div class="text-xs text-white/60 font-bold">E-mail (envio do PDF)</div>
-                    <input name="mail_from" value="<?php echo h($mail_from); ?>" placeholder="no-reply@seudominio.com"
+                    <input name="mail_from" value="<?php echo h($mail_from); ?>" placeholder="no-reply@xiterlabs.site"
                            class="mt-2 w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
                 </div>
             </div>
@@ -236,7 +236,7 @@ ob_start();
                     </div>
                     <div class="lg:col-span-2">
                         <label class="block text-xs font-bold text-white/60 mb-2">Webhook URL (informativo)</label>
-                        <input name="payment_webhook_url" value="<?php echo h($payment_webhook_url); ?>" placeholder="https://seudominio.com/api/webhook_stripe.php"
+                        <input name="payment_webhook_url" value="<?php echo h($payment_webhook_url); ?>" placeholder="https://xiterlabs.site/api/webhook_stripe.php"
                                class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
                     </div>
                     <div class="lg:col-span-2">
