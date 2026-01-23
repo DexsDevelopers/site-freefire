@@ -101,6 +101,8 @@ $planCount = count($plans);
         }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <link rel="stylesheet" href="/assets/popup.css" />
+    <script src="/assets/popup.js" defer></script>
 </head>
 <body class="bg-black text-white font-sans antialiased">
     <div id="root">
@@ -513,15 +515,37 @@ $planCount = count($plans);
                     const response = await fetch('/api/cart.php', { method: 'POST', body: formData });
                     const data = await response.json();
                     if (data.success) {
-                        if (confirm('Produto adicionado ao carrinho! Ir para o carrinho?')) {
-                            window.location.href = '/carrinho.php';
+                        if (window.ThunderPopup && typeof window.ThunderPopup.confirm === 'function') {
+                            const ok = await window.ThunderPopup.confirm({
+                                title: 'Adicionado ao carrinho',
+                                message: 'Produto adicionado ao carrinho. Quer ir para o carrinho agora?',
+                                confirmText: 'Ir para carrinho',
+                                cancelText: 'Continuar',
+                                danger: false
+                            });
+                            if (ok) window.location.href = '/carrinho';
+                            else if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                                window.ThunderPopup.toast('success', 'Produto adicionado ao carrinho.');
+                            }
+                        } else {
+                            if (confirm('Produto adicionado ao carrinho! Ir para o carrinho?')) {
+                                window.location.href = '/carrinho.php';
+                            }
                         }
                     } else {
-                        alert(data.message || 'Não foi possível adicionar ao carrinho.');
+                        if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                            window.ThunderPopup.toast('error', data.message || 'Não foi possível adicionar ao carrinho.');
+                        } else {
+                            alert(data.message || 'Não foi possível adicionar ao carrinho.');
+                        }
                     }
                 } catch (error) {
                     console.error(error);
-                    alert('Erro ao adicionar ao carrinho.');
+                    if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                        window.ThunderPopup.toast('error', 'Erro ao adicionar ao carrinho.');
+                    } else {
+                        alert('Erro ao adicionar ao carrinho.');
+                    }
                 }
             });
         })();

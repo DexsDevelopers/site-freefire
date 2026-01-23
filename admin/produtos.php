@@ -171,7 +171,12 @@ ob_start();
                                        href="<?php echo h('/admin/produtos.php?' . http_build_query(['product_id' => $p['id']])); ?>">
                                         Planos
                                     </a>
-                                    <form method="post" onsubmit="return confirm('Remover produto e todos os planos?');">
+                                    <form method="post"
+                                          data-confirm="Remover produto e todos os planos?"
+                                          data-confirm-title="Excluir produto"
+                                          data-confirm-ok="Excluir"
+                                          data-confirm-cancel="Cancelar"
+                                          data-confirm-danger="1">
                                         <?php echo csrf_input(); ?>
                                         <input type="hidden" name="action" value="delete_product">
                                         <input type="hidden" name="id" value="<?php echo h($p['id']); ?>">
@@ -262,7 +267,12 @@ ob_start();
                                            href="<?php echo h('/admin/produtos.php?' . http_build_query(['product_id' => $activeProductId, 'edit_plan' => $pl['id']])); ?>">
                                             Editar
                                         </a>
-                                        <form method="post" onsubmit="return confirm('Remover plano?');">
+                                        <form method="post"
+                                              data-confirm="Remover plano?"
+                                              data-confirm-title="Excluir plano"
+                                              data-confirm-ok="Excluir"
+                                              data-confirm-cancel="Cancelar"
+                                              data-confirm-danger="1">
                                             <?php echo csrf_input(); ?>
                                             <input type="hidden" name="action" value="delete_plan">
                                             <input type="hidden" name="product_id" value="<?php echo h($activeProductId); ?>">

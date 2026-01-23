@@ -28,11 +28,13 @@ session_start();
         }
     </script>
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
+    <link rel="stylesheet" href="/assets/popup.css" />
     <style>
         html, body { touch-action: pan-x pan-y; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <script src="/assets/popup.js" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
     <!-- Navbar -->
@@ -166,12 +168,21 @@ session_start();
                 
                 if (data.success) {
                     msgDiv.className = 'mt-4 text-center text-sm font-medium text-green-500';
+                    if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                        window.ThunderPopup.toast('success', data.message || 'Login realizado.');
+                    }
                     setTimeout(() => window.location.href = '/', 1500);
                 } else {
                     msgDiv.className = 'mt-4 text-center text-sm font-medium text-red-500';
+                    if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                        window.ThunderPopup.toast('error', data.message || 'Não foi possível fazer login.');
+                    }
                 }
             } catch (error) {
                 console.error('Erro:', error);
+                if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                    window.ThunderPopup.toast('error', 'Erro ao fazer login.');
+                }
             }
         });
 

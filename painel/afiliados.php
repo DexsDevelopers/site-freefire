@@ -25,10 +25,12 @@ if (!isset($_SESSION['user_id'])) {
         }
     </script>
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
+    <link rel="stylesheet" href="/assets/popup.css" />
     <style>
         html, body { touch-action: pan-x pan-y; }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <script src="/assets/popup.js" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen font-sans">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -110,6 +112,9 @@ if (!isset($_SESSION['user_id'])) {
                 ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'
                 : 'border-accent/40 bg-accent/10 text-red-200');
             el.textContent = message;
+            if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                window.ThunderPopup.toast(type === 'success' ? 'success' : 'error', message);
+            }
         }
 
         async function loadAffiliate() {

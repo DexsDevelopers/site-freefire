@@ -28,11 +28,13 @@ session_start();
         }
     </script>
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
+    <link rel="stylesheet" href="/assets/popup.css" />
     <style>
         html, body { touch-action: pan-x pan-y; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <script src="/assets/popup.js" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
     <!-- Navbar -->
@@ -270,12 +272,33 @@ session_start();
                 if (action === 'inc') data = await updateQty(planId, +1);
                 else if (action === 'dec') data = await updateQty(planId, -1);
                 else if (action === 'remove') {
-                    if (!confirm('Remover este item?')) return;
+                    if (window.ThunderPopup && typeof window.ThunderPopup.confirm === 'function') {
+                        const ok = await window.ThunderPopup.confirm({
+                            title: 'Remover item',
+                            message: 'Remover este item do carrinho?',
+                            confirmText: 'Remover',
+                            cancelText: 'Cancelar',
+                            danger: true
+                        });
+                        if (!ok) return;
+                    } else {
+                        if (!confirm('Remover este item?')) return;
+                    }
                     data = await removePlan(planId);
                 }
-                if (data?.success) renderCart(data);
+                if (data?.success) {
+                    renderCart(data);
+                    if (action === 'remove' && window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                        window.ThunderPopup.toast('success', 'Item removido do carrinho.');
+                    }
+                } else if (data && !data.success && window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                    window.ThunderPopup.toast('error', data.message || 'Não foi possível atualizar o carrinho.');
+                }
             } catch (e) {
                 console.error(e);
+                if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                    window.ThunderPopup.toast('error', 'Erro ao atualizar o carrinho.');
+                }
             } finally {
                 btn.disabled = false;
             }

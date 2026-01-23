@@ -104,6 +104,8 @@ if (!isset($_SESSION['user_id'])) {
         }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <link rel="stylesheet" href="/assets/popup.css" />
+    <script src="/assets/popup.js" defer></script>
 </head>
 <body class="bg-neutral-950 text-neutral-50 min-h-dvh font-sans antialiased">
     <div class="fixed inset-0 pointer-events-none -z-10">

@@ -58,10 +58,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
+    <link rel="stylesheet" href="/assets/popup.css" />
     <style>
         html, body { touch-action: pan-x pan-y; }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <script src="/assets/popup.js" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen flex items-center justify-center px-4">
     <div class="w-full max-w-md">

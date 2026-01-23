@@ -42,10 +42,12 @@ function render_admin_layout($pageTitle, $activeKey, $contentHtml)
             }
         </script>
         <link rel="icon" type="image/png" href="/logo-thunder.png" />
+        <link rel="stylesheet" href="/assets/popup.css" />
         <style>
             html, body { touch-action: pan-x pan-y; }
         </style>
         <script src="/assets/no-zoom.js" defer></script>
+        <script src="/assets/popup.js" defer></script>
     </head>
     <body class="bg-admin-bg text-white min-h-screen">
         <div class="flex min-h-screen">
