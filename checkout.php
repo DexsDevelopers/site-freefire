@@ -106,6 +106,36 @@ $isLogged = !empty($_SESSION['user_id']);
                                 <input name="delivery_discord" required class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="usuario#0000 ou @usuario">
                             </div>
 
+                            <div class="rounded-2xl border border-white/10 bg-black/30 p-4">
+                                <div class="text-xs text-white/50 font-black tracking-wide uppercase">Aviso de Segurança (PIX)</div>
+                                <div class="mt-2 text-white/70 font-semibold leading-relaxed">
+                                    Se o seu banco exibir um alerta de segurança/possível golpe, <span class="text-white">confira os dados do recebedor</span> antes de confirmar.
+                                    Se estiver em dúvida, <span class="text-white">não transfira</span> e abra um ticket no nosso Discord para suporte.
+                                </div>
+                                <div class="mt-3">
+                                    <a href="https://discord.gg/hpjCtT7CU7" target="_blank" rel="noopener" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-ff-red hover:bg-red-700 font-black text-sm">
+                                        Abrir ticket no Discord
+                                    </a>
+                                </div>
+                                <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <a href="/40f2de66-65cc-46ec-a72a-30f0ddb450f5.jpg" target="_blank" rel="noopener" class="block rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
+                                        <img src="/40f2de66-65cc-46ec-a72a-30f0ddb450f5.jpg" alt="Exemplo de alerta de golpe no app do banco" class="w-full h-44 object-cover" loading="lazy">
+                                        <div class="px-3 py-2 text-xs text-white/60 font-semibold">Exemplo 1</div>
+                                    </a>
+                                    <a href="/25f05c2a-fae8-4c58-83d2-d713b43aa273.jpg" target="_blank" rel="noopener" class="block rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
+                                        <img src="/25f05c2a-fae8-4c58-83d2-d713b43aa273.jpg" alt="Exemplo de alerta de segurança ao pagar PIX" class="w-full h-44 object-cover" loading="lazy">
+                                        <div class="px-3 py-2 text-xs text-white/60 font-semibold">Exemplo 2</div>
+                                    </a>
+                                    <a href="/8fd2d8fb-32f8-4f89-9f67-e939bd07337d.jpg" target="_blank" rel="noopener" class="block rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
+                                        <img src="/8fd2d8fb-32f8-4f89-9f67-e939bd07337d.jpg" alt="Exemplo de aviso de segurança antes de transferir" class="w-full h-44 object-cover" loading="lazy">
+                                        <div class="px-3 py-2 text-xs text-white/60 font-semibold">Exemplo 3</div>
+                                    </a>
+                                </div>
+                                <div class="mt-3 text-xs text-white/40 font-semibold">
+                                    Dica: clique em uma imagem para abrir em tela cheia.
+                                </div>
+                            </div>
+
                             <div id="checkout-alert" class="hidden rounded-2xl border px-4 py-3 text-sm font-semibold"></div>
 
                             <button id="btn-finish" class="w-full mt-4 px-6 py-4 rounded-2xl bg-green-600 hover:bg-green-700 font-black tracking-wide text-lg shadow-[0_0_22px_rgba(22,163,74,0.35)]">

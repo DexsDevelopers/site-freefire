@@ -160,7 +160,7 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
 
             <div class="rounded-2xl border border-white/10 bg-white/5 p-6 h-fit">
                 <div class="text-xl font-black">Resumo</div>
-                <div class="mt-4 space-y-2 text-white/70 font-semibold">
+                <div class="mt-4 space-y-3 text-white/70 font-semibold">
                     <div class="flex justify-between"><span>Status</span><span class="text-white"><?php echo htmlspecialchars((string)($order['status'] ?? '')); ?></span></div>
                     <div class="flex justify-between"><span>Cliente</span><span class="text-white"><?php echo htmlspecialchars($customerName); ?></span></div>
                     <div class="pt-2">
@@ -182,16 +182,46 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
                 <div class="mt-6 rounded-2xl border border-white/10 bg-black/30 p-5">
                     <div class="text-sm font-black tracking-wide uppercase text-white/80">Pagamento</div>
                     <?php if ($paymentMethod === 'manual'): ?>
-                        <div class="mt-3 text-white/70 font-semibold"><?php echo htmlspecialchars($manualInstructions); ?></div>
+                        <div class="mt-3 text-white/70 font-semibold leading-relaxed"><?php echo htmlspecialchars($manualInstructions); ?></div>
+                        <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+                            <div class="text-xs text-white/50 font-black tracking-wide uppercase">Passo a passo</div>
+                            <div class="mt-2 text-sm text-white/70 font-semibold leading-relaxed">
+                                1) Faça o PIX usando a chave abaixo<br>
+                                2) Pegue o comprovante no app do seu banco (ou tire print)<br>
+                                3) Abra um ticket no nosso Discord e envie o comprovante + o ID do pedido
+                            </div>
+                        </div>
                         <?php if ($pixKey !== ''): ?>
                             <div class="mt-4">
                                 <div class="text-xs text-white/50 font-bold tracking-wide uppercase">Chave PIX</div>
-                                <div class="mt-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10 font-black break-all"><?php echo htmlspecialchars($pixKey); ?></div>
+                                <div class="mt-2 flex items-stretch gap-2">
+                                    <div class="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 font-black break-all"><?php echo htmlspecialchars($pixKey); ?></div>
+                                    <button type="button" data-copy="<?php echo htmlspecialchars($pixKey); ?>" class="px-4 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-black text-sm">
+                                        Copiar
+                                    </button>
+                                </div>
                             </div>
                         <?php endif; ?>
                         <div class="mt-4">
-                            <a href="/api/receipt.php?order_id=<?php echo (int)$orderId; ?>" class="block text-center px-5 py-3 rounded-xl bg-ff-red hover:bg-red-700 font-black">Baixar comprovante (PDF)</a>
-                            <div class="text-xs text-white/40 mt-2">O comprovante também é enviado por e-mail quando o servidor possui envio de e-mail configurado.</div>
+                            <div class="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+                                <div>
+                                    <div class="text-xs text-white/50 font-black tracking-wide uppercase">ID do pedido</div>
+                                    <div class="font-black text-white">#<?php echo (int)$orderId; ?></div>
+                                </div>
+                                <button type="button" data-copy="<?php echo (int)$orderId; ?>" class="px-4 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-black text-sm">
+                                    Copiar
+                                </button>
+                            </div>
+
+                            <div class="mt-4">
+                                <a href="https://discord.gg/hpjCtT7CU7" target="_blank" rel="noopener" class="block text-center px-5 py-3 rounded-xl bg-ff-red hover:bg-red-700 font-black">
+                                    Abrir ticket no Discord
+                                </a>
+                            </div>
+
+                            <div class="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 font-semibold leading-relaxed">
+                                Abra um ticket no Discord e envie o comprovante do PIX (do seu banco) + o ID do pedido. Sem o comprovante, a entrega pode atrasar.
+                            </div>
                         </div>
                     <?php else: ?>
                         <?php if ($paymentStatus === 'paid'): ?>
@@ -238,6 +268,40 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
                     danger: false
                 });
             }
+        })();
+    </script>
+    <script>
+        (function () {
+            const buttons = document.querySelectorAll('[data-copy]');
+            if (!buttons.length) return;
+            buttons.forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const value = btn.getAttribute('data-copy') || '';
+                    if (!value) return;
+                    try {
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            await navigator.clipboard.writeText(value);
+                        } else {
+                            const ta = document.createElement('textarea');
+                            ta.value = value;
+                            ta.style.position = 'fixed';
+                            ta.style.left = '-9999px';
+                            document.body.appendChild(ta);
+                            ta.focus();
+                            ta.select();
+                            document.execCommand('copy');
+                            ta.remove();
+                        }
+                        if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                            window.ThunderPopup.toast('success', 'Copiado.');
+                        }
+                    } catch (e) {
+                        if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                            window.ThunderPopup.toast('error', 'Não foi possível copiar.');
+                        }
+                    }
+                });
+            });
         })();
     </script>
 </body>
