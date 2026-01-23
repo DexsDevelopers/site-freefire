@@ -10,6 +10,8 @@
         html, body { touch-action: pan-x pan-y; }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <link rel="stylesheet" href="/assets/popup.css" />
+    <script src="/assets/popup.js" defer></script>
 </head>
 <body class="bg-black text-white font-sans antialiased">
     <div id="root">
@@ -92,7 +94,7 @@
                                 </label>
                             </div>
 
-                            <button onclick="alert('Sistema de pagamento em breve!')" class="w-full bg-ff-red text-white font-black uppercase py-4 rounded-lg hover:bg-red-700 transition-colors tracking-wider shadow-[0_4px_14px_rgba(255,0,0,0.4)] hover:shadow-[0_6px_20px_rgba(255,0,0,0.6)] flex items-center justify-center gap-2">
+                            <button id="btnComprarAgora" class="w-full bg-ff-red text-white font-black uppercase py-4 rounded-lg hover:bg-red-700 transition-colors tracking-wider shadow-[0_4px_14px_rgba(255,0,0,0.4)] hover:shadow-[0_6px_20px_rgba(255,0,0,0.6)] flex items-center justify-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
                                 COMPRAR AGORA
                             </button>
@@ -109,5 +111,18 @@
             </footer>
         </div>
     </div>
+    <script>
+        (function () {
+            const btn = document.getElementById('btnComprarAgora');
+            if (!btn) return;
+            btn.addEventListener('click', function () {
+                if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                    window.ThunderPopup.toast('info', 'Sistema de pagamento em breve!', { title: 'Em breve' });
+                } else {
+                    alert('Sistema de pagamento em breve!');
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

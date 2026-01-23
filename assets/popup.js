@@ -85,11 +85,26 @@
 
   function confirmDialog(opts) {
     const o = opts && typeof opts === 'object' ? opts : {};
-    const title = String(o.title || 'Confirmar ação');
-    const message = String(o.message || 'Tem certeza?');
-    const confirmText = String(o.confirmText || 'Confirmar');
-    const cancelText = String(o.cancelText || 'Cancelar');
+    return modalDialog({
+      type: o.type || (o.danger ? 'warning' : 'info'),
+      title: o.title || 'Confirmar ação',
+      message: o.message || 'Tem certeza?',
+      primaryText: o.confirmText || 'Confirmar',
+      secondaryText: o.cancelText || 'Cancelar',
+      danger: !!o.danger,
+      allowOutsideClose: true,
+    });
+  }
+
+  function modalDialog(opts) {
+    const o = opts && typeof opts === 'object' ? opts : {};
+    const type = normalizeType(o.type);
+    const title = String(o.title || 'Aviso');
+    const message = String(o.message || '');
+    const primaryText = String(o.primaryText || 'OK');
+    const secondaryText = (o.secondaryText === null || o.secondaryText === undefined) ? '' : String(o.secondaryText || '');
     const danger = !!o.danger;
+    const allowOutsideClose = (o.allowOutsideClose === undefined) ? true : !!o.allowOutsideClose;
 
     return new Promise((resolve) => {
       const overlay = document.createElement('div');
@@ -99,11 +114,13 @@
       overlay.tabIndex = -1;
 
       const modal = document.createElement('div');
-      modal.className = 'tp-modal';
+      modal.className = `tp-modal tp-theme-${type}`;
 
+      const icon = ICONS[type] || ICONS.info;
       modal.innerHTML = `
         <div class="tp-modal__top">
-          <div>
+          <div class="tp-modal__head">
+            <div class="tp-modal__type">${icon}</div>
             <h3 class="tp-modal__title">${escapeHtml(title)}</h3>
           </div>
           <button class="tp-modal__close" type="button" aria-label="Fechar">
@@ -112,8 +129,8 @@
         </div>
         <div class="tp-modal__body">${escapeHtml(message)}</div>
         <div class="tp-modal__actions">
-          <button class="tp-btn" type="button" data-tp-cancel>${escapeHtml(cancelText)}</button>
-          <button class="tp-btn ${danger ? 'tp-btn--danger' : 'tp-btn--primary'}" type="button" data-tp-confirm>${escapeHtml(confirmText)}</button>
+          ${secondaryText ? `<button class="tp-btn" type="button" data-tp-cancel>${escapeHtml(secondaryText)}</button>` : ''}
+          <button class="tp-btn ${danger ? 'tp-btn--danger' : 'tp-btn--primary'}" type="button" data-tp-confirm>${escapeHtml(primaryText)}</button>
         </div>
       `;
 
@@ -146,6 +163,7 @@
       }
 
       overlay.addEventListener('click', (e) => {
+        if (!allowOutsideClose) return;
         if (e.target === overlay) cleanup(false);
       });
       btnClose && btnClose.addEventListener('click', () => cleanup(false));
@@ -154,6 +172,19 @@
       document.addEventListener('keydown', onKey, true);
       setTimeout(() => { if (btnConfirm) btnConfirm.focus(); }, 0);
     });
+  }
+
+  function alertDialog(opts) {
+    const o = opts && typeof opts === 'object' ? opts : {};
+    return modalDialog({
+      type: o.type || 'info',
+      title: o.title || 'Aviso',
+      message: o.message || '',
+      primaryText: o.okText || 'OK',
+      secondaryText: '',
+      danger: !!o.danger,
+      allowOutsideClose: true,
+    }).then(() => undefined);
   }
 
   function trapFocus(e, root) {
@@ -226,6 +257,8 @@
   window.ThunderPopup = {
     toast,
     confirm: confirmDialog,
+    modal: modalDialog,
+    alert: alertDialog,
     bindConfirmForms,
     installPolyfill: installAlertConfirmPolyfill,
   };

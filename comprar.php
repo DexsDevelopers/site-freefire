@@ -323,7 +323,7 @@ $planCount = count($plans);
                                             $checked = ($pid === $bestPlanId) || ($bestPlanId === 0 && $idx === 0);
                                             $isBest = ($pid === $bestPlanId);
                                         ?>
-                                        <label class="block cursor-pointer group">
+                                        <label class="block cursor-pointer group h-full">
                                             <input
                                                 type="radio"
                                                 name="plan_id"
@@ -333,17 +333,17 @@ $planCount = count($plans);
                                                 class="peer sr-only"
                                                 <?php echo $checked ? 'checked' : ''; ?>
                                             >
-                                            <div class="rounded-2xl border border-white/10 bg-black/30 p-4 transition-all duration-300 group-hover:border-white/20 group-hover:-translate-y-0.5 peer-checked:border-ff-red/60 peer-checked:bg-ff-red/10">
-                                                <div class="flex items-start justify-between gap-3">
-                                                    <div>
-                                                        <div class="text-sm font-black"><?php echo htmlspecialchars((string)$plan['name']); ?></div>
+                                            <div class="rounded-2xl border border-white/10 bg-black/30 p-4 transition-all duration-300 group-hover:border-white/20 group-hover:-translate-y-0.5 peer-checked:border-ff-red/60 peer-checked:bg-ff-red/10 h-full min-h-[92px] flex items-center">
+                                                <div class="flex items-start justify-between gap-3 w-full">
+                                                    <div class="min-w-0">
+                                                        <div class="text-sm font-black truncate"><?php echo htmlspecialchars((string)$plan['name']); ?></div>
                                                         <?php if ($isBest): ?>
                                                             <div class="mt-1 text-[10px] font-black uppercase tracking-[0.22em] text-red-200">Mais escolhido</div>
                                                         <?php else: ?>
                                                             <div class="mt-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/40">Plano</div>
                                                         <?php endif; ?>
                                                     </div>
-                                                    <div class="text-right">
+                                                    <div class="text-right shrink-0">
                                                         <div class="text-[10px] font-black uppercase tracking-[0.22em] text-white/50">Preço</div>
                                                         <div class="text-base font-black text-white">R$ <?php echo number_format((float)$plan['price'], 2, ',', '.'); ?></div>
                                                     </div>

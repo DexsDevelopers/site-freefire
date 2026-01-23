@@ -35,6 +35,8 @@ $today = (new DateTime('now', new DateTimeZone('America/Sao_Paulo')))->format('Y
         @keyframes pop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <link rel="stylesheet" href="/assets/popup.css" />
+    <script src="/assets/popup.js" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen">
     <nav class="bg-black/80 backdrop-blur-md border-b border-white/10 fixed w-full z-50 transition-all duration-300 overflow-hidden">
@@ -265,6 +267,10 @@ $today = (new DateTime('now', new DateTimeZone('America/Sao_Paulo')))->format('Y
                 openBtn.disabled = true;
             }
             function showToast(text) {
+                if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                    window.ThunderPopup.toast('info', text);
+                    return;
+                }
                 if (!toast || !toastText) return;
                 toastText.textContent = text;
                 toast.classList.remove('hidden');

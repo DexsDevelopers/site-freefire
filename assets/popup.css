@@ -136,6 +136,10 @@
   opacity:0;
   animation: tp-modal-in 180ms ease-out forwards;
 }
+.tp-modal.tp-theme-success{ border-color: rgba(34,197,94,0.22); }
+.tp-modal.tp-theme-info{ border-color: rgba(59,130,246,0.18); }
+.tp-modal.tp-theme-warning{ border-color: rgba(245,158,11,0.22); }
+.tp-modal.tp-theme-error{ border-color: rgba(239,68,68,0.24); }
 .tp-modal__top{
   padding:18px 18px 12px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.10);
@@ -144,6 +148,26 @@
   justify-content:space-between;
   gap:12px;
 }
+.tp-modal__head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.tp-modal__type{
+  width:36px;
+  height:36px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.06);
+  flex:0 0 auto;
+}
+.tp-theme-success .tp-modal__type{ border-color: rgba(34,197,94,0.40); background: rgba(34,197,94,0.10); }
+.tp-theme-info .tp-modal__type{ border-color: rgba(59,130,246,0.40); background: rgba(59,130,246,0.10); }
+.tp-theme-warning .tp-modal__type{ border-color: rgba(245,158,11,0.40); background: rgba(245,158,11,0.10); }
+.tp-theme-error .tp-modal__type{ border-color: rgba(239,68,68,0.45); background: rgba(239,68,68,0.10); }
 .tp-modal__title{
   margin:0;
   font-size:16px;

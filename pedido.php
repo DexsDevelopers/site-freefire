@@ -116,11 +116,13 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
         }
     </script>
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
+    <link rel="stylesheet" href="/assets/popup.css" />
     <style>
         html, body { touch-action: pan-x pan-y; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <script src="/assets/popup.js" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen">
     <div class="max-w-5xl mx-auto px-4 py-10">
@@ -203,5 +205,40 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
             </div>
         </div>
     </div>
+    <script>
+        (function () {
+            if (!window.ThunderPopup || typeof window.ThunderPopup.modal !== 'function') return;
+            const orderId = <?php echo (int)$orderId; ?>;
+            const paymentMethod = <?php echo json_encode($paymentMethod); ?>;
+            const paymentStatus = <?php echo json_encode($paymentStatus); ?>;
+            const key = 'tp_order_notice_' + String(orderId) + '_' + String(paymentMethod) + '_' + String(paymentStatus);
+            if (localStorage.getItem(key) === '1') return;
+
+            if (paymentMethod === 'api' && paymentStatus === 'paid') {
+                localStorage.setItem(key, '1');
+                window.ThunderPopup.modal({
+                    type: 'success',
+                    title: 'Pagamento confirmado',
+                    message: 'Seu pagamento foi confirmado. Você vai receber a key e o download do painel no Gmail e Discord informados.',
+                    primaryText: 'Entendi',
+                    secondaryText: '',
+                    danger: false
+                });
+                return;
+            }
+
+            if (paymentMethod === 'manual' && paymentStatus !== 'paid') {
+                localStorage.setItem(key, '1');
+                window.ThunderPopup.modal({
+                    type: 'info',
+                    title: 'Pedido criado',
+                    message: 'Finalize o pagamento conforme as instruções. Assim que confirmar, a entrega digital será enviada no Gmail e Discord informados.',
+                    primaryText: 'Ok',
+                    secondaryText: '',
+                    danger: false
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
