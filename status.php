@@ -3,7 +3,7 @@ session_start();
 require_once 'api/db.php';
 
 $products = [];
-$result = $conn->query("SELECT id, slug, name, status, image_url FROM products ORDER BY name ASC");
+$result = $conn->query("SELECT id, slug, name, status, image_url FROM products ORDER BY (slug = 'freefire') DESC, name ASC");
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $products[] = $row;

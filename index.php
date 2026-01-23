@@ -20,7 +20,7 @@ if ($dbOk && isset($conn)) {
         LEFT JOIN plans pl ON pl.product_id = p.id
         WHERE p.status = 'Ativo'
         GROUP BY p.id
-        ORDER BY p.id DESC
+        ORDER BY (p.slug = 'freefire') DESC, p.id DESC
     ";
     $result = $conn->query($sql);
     if ($result) {
@@ -270,7 +270,7 @@ if (!$dbOk || count($products) === 0) {
 
     <!-- Floating Support Button -->
     <div class="fixed bottom-6 right-6 z-50">
-        <a href="#" class="bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] hover:shadow-[0_0_30px_rgba(220,38,38,0.8)] transition-all transform hover:-translate-y-1 hover:scale-110 flex items-center justify-center">
+        <a href="https://discord.gg/hpjCtT7CU7" target="_blank" rel="noopener" aria-label="Abrir suporte no Discord" class="bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] hover:shadow-[0_0_30px_rgba(220,38,38,0.8)] transition-all transform hover:-translate-y-1 hover:scale-110 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
         </a>
     </div>
@@ -367,22 +367,22 @@ if (!$dbOk || count($products) === 0) {
                     </div>
 
                     <!-- Suporte Card -->
-                    <div class="bg-[#0a0a0a] border border-white/5 p-10 rounded-xl flex flex-col items-center text-center hover:bg-[#111] transition-all duration-300 group hover:-translate-y-1">
+                    <a href="https://discord.gg/hpjCtT7CU7" target="_blank" rel="noopener" class="bg-[#0a0a0a] border border-white/5 p-10 rounded-xl flex flex-col items-center text-center hover:bg-[#111] transition-all duration-300 group hover:-translate-y-1">
                         <div class="mb-6 group-hover:scale-110 transition-transform duration-300">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
                         </div>
                         <h3 class="text-2xl font-black text-white uppercase tracking-wide mb-3">SUPORTE</h3>
                         <p class="text-gray-400 font-medium">Nossa equipe entra via AnyDesk.</p>
-                    </div>
+                    </a>
 
                     <!-- Comunidade VIP Card -->
-                    <div class="bg-[#0a0a0a] border border-white/5 p-10 rounded-xl flex flex-col items-center text-center hover:bg-[#111] transition-all duration-300 group hover:-translate-y-1">
+                    <a href="https://discord.gg/hpjCtT7CU7" target="_blank" rel="noopener" class="bg-[#0a0a0a] border border-white/5 p-10 rounded-xl flex flex-col items-center text-center hover:bg-[#111] transition-all duration-300 group hover:-translate-y-1">
                         <div class="mb-6 group-hover:scale-110 transition-transform duration-300">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>
                         </div>
                         <h3 class="text-2xl font-black text-white uppercase tracking-wide mb-3">COMUNIDADE VIP</h3>
                         <p class="text-gray-400 font-medium">Acesso exclusivo ao Discord.</p>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -505,6 +505,9 @@ if (!$dbOk || count($products) === 0) {
                                 </svg>
                             </a>
                         </div>
+                        <a href="/teste-gratis.php?game=<?php echo $product['slug']; ?>" class="mt-3 block text-center px-4 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-black text-sm">
+                            Conseguir key grátis (2h) para testar
+                        </a>
                     </div>
                 </div>
                 <?php $i++; endforeach; ?>

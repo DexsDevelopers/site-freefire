@@ -116,13 +116,13 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
         }
     </script>
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
-    <link rel="stylesheet" href="/assets/popup.css" />
+    <link rel="stylesheet" href="/assets/popup.css?v=20260123" />
     <style>
         html, body { touch-action: pan-x pan-y; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
-    <script src="/assets/popup.js" defer></script>
+    <script src="/assets/popup.js?v=20260123" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen">
     <div class="max-w-5xl mx-auto px-4 py-10">
@@ -137,8 +137,8 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
             </div>
         </div>
 
-        <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div class="lg:col-span-2 rounded-2xl border border-white/10 bg-white/5 p-6">
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div class="lg:col-span-7 rounded-2xl border border-white/10 bg-white/5 p-6">
                 <div class="text-xl font-black">Itens</div>
                 <div class="mt-5 space-y-3">
                     <?php foreach ($items as $it): ?>
@@ -158,7 +158,7 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 h-fit">
+            <div class="lg:col-span-5 rounded-2xl border border-white/10 bg-white/5 p-6 h-fit">
                 <div class="text-xl font-black">Resumo</div>
                 <div class="mt-4 space-y-3 text-white/70 font-semibold">
                     <div class="flex justify-between"><span>Status</span><span class="text-white"><?php echo htmlspecialchars((string)($order['status'] ?? '')); ?></span></div>
@@ -180,22 +180,39 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
                 </div>
 
                 <div class="mt-6 rounded-2xl border border-white/10 bg-black/30 p-5">
-                    <div class="text-sm font-black tracking-wide uppercase text-white/80">Pagamento</div>
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="text-sm font-black tracking-wide uppercase text-white/80">Pagamento</div>
+                        <?php if ($paymentMethod === 'manual'): ?>
+                            <div class="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs font-black tracking-wide uppercase">PIX Manual</div>
+                        <?php endif; ?>
+                    </div>
                     <?php if ($paymentMethod === 'manual'): ?>
                         <div class="mt-3 text-white/70 font-semibold leading-relaxed"><?php echo htmlspecialchars($manualInstructions); ?></div>
-                        <div class="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-                            <div class="text-xs text-white/50 font-black tracking-wide uppercase">Passo a passo</div>
-                            <div class="mt-2 text-sm text-white/70 font-semibold leading-relaxed">
-                                1) Faça o PIX usando a chave abaixo<br>
-                                2) Pegue o comprovante no app do seu banco (ou tire print)<br>
-                                3) Abra um ticket no nosso Discord e envie o comprovante + o ID do pedido
+
+                        <div class="mt-4 grid grid-cols-1 gap-3">
+                            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+                                <div class="text-xs text-white/50 font-black tracking-wide uppercase">Passo a passo</div>
+                                <div class="mt-3 space-y-2 text-sm text-white/70 font-semibold leading-relaxed">
+                                    <div class="flex gap-3">
+                                        <div class="h-7 w-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white font-black">1</div>
+                                        <div class="flex-1">Faça o PIX usando a chave abaixo.</div>
+                                    </div>
+                                    <div class="flex gap-3">
+                                        <div class="h-7 w-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white font-black">2</div>
+                                        <div class="flex-1">Pegue o comprovante no app do seu banco (ou tire print).</div>
+                                    </div>
+                                    <div class="flex gap-3">
+                                        <div class="h-7 w-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white font-black">3</div>
+                                        <div class="flex-1">Abra um ticket no Discord e envie o comprovante + o ID do pedido.</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <?php if ($pixKey !== ''): ?>
                             <div class="mt-4">
                                 <div class="text-xs text-white/50 font-bold tracking-wide uppercase">Chave PIX</div>
                                 <div class="mt-2 flex items-stretch gap-2">
-                                    <div class="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 font-black break-all"><?php echo htmlspecialchars($pixKey); ?></div>
+                                    <div class="flex-1 px-4 py-3 rounded-xl bg-black/30 border border-white/10 font-black break-all"><?php echo htmlspecialchars($pixKey); ?></div>
                                     <button type="button" data-copy="<?php echo htmlspecialchars($pixKey); ?>" class="px-4 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-black text-sm">
                                         Copiar
                                     </button>
@@ -213,10 +230,13 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
                                 </button>
                             </div>
 
-                            <div class="mt-4">
+                            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <a href="https://discord.gg/hpjCtT7CU7" target="_blank" rel="noopener" class="block text-center px-5 py-3 rounded-xl bg-ff-red hover:bg-red-700 font-black">
                                     Abrir ticket no Discord
                                 </a>
+                                <button type="button" data-copy="<?php echo htmlspecialchars('Pedido #' . (int)$orderId . ' - Segue comprovante PIX.'); ?>" class="px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-black">
+                                    Copiar mensagem
+                                </button>
                             </div>
 
                             <div class="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 font-semibold leading-relaxed">

@@ -26,7 +26,7 @@ $isLogged = !empty($_SESSION['user_id']);
         }
     </script>
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
-    <link rel="stylesheet" href="/assets/popup.css" />
+    <link rel="stylesheet" href="/assets/popup.css?v=20260123" />
     <style>
         html, body { touch-action: pan-x pan-y; }
         body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
@@ -34,7 +34,7 @@ $isLogged = !empty($_SESSION['user_id']);
         input[type=number] { -moz-appearance: textfield; }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
-    <script src="/assets/popup.js" defer></script>
+    <script src="/assets/popup.js?v=20260123" defer></script>
 </head>
 <body class="bg-black text-white min-h-screen">
     <nav class="bg-black/80 backdrop-blur-md border-b border-white/10 fixed w-full z-50">
@@ -273,6 +273,24 @@ $isLogged = !empty($_SESSION['user_id']);
                         btn.disabled = false;
                         btn.textContent = originalText || 'Pagar e concluir';
                     }
+                }
+            });
+        })();
+    </script>
+    <script>
+        (function () {
+            document.addEventListener('click', function (e) {
+                const el = e.target && e.target.closest ? e.target.closest('[data-tp-image]') : null;
+                if (!el) return;
+                e.preventDefault();
+                const src = el.getAttribute('data-tp-image') || '';
+                const title = el.getAttribute('data-tp-image-title') || 'Visualizar';
+                const caption = el.getAttribute('data-tp-image-caption') || '';
+                const alt = el.getAttribute('data-tp-image-alt') || 'Imagem';
+                if (window.ThunderPopup && typeof window.ThunderPopup.image === 'function') {
+                    window.ThunderPopup.image({ src, title, caption, alt });
+                } else if (src) {
+                    window.open(src, '_blank', 'noopener');
                 }
             });
         })();
