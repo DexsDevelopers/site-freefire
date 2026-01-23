@@ -61,7 +61,7 @@ $isLogged = !empty($_SESSION['user_id']);
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-10">
                 <h1 class="text-3xl md:text-5xl font-black uppercase tracking-wider">Finalizar Compra</h1>
-                <p class="text-white/60 mt-3 font-semibold">Preencha seus dados, escolha o frete e finalize o pagamento.</p>
+                <p class="text-white/60 mt-3 font-semibold">Produto digital: receba key e download no Gmail e Discord.</p>
             </div>
 
             <?php if (!$isLogged): ?>
@@ -84,8 +84,8 @@ $isLogged = !empty($_SESSION['user_id']);
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-bold text-white/70 mb-2">E-mail</label>
-                                    <input name="customer_email" type="email" required class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="voce@email.com">
+                                    <label class="block text-sm font-bold text-white/70 mb-2">Gmail (Entrega)</label>
+                                    <input name="customer_email" type="email" required class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="seugmail@gmail.com">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-white/70 mb-2">Telefone</label>
@@ -93,36 +93,15 @@ $isLogged = !empty($_SESSION['user_id']);
                                 </div>
                             </div>
 
-                            <h3 class="text-xl font-black pt-4">Entrega</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-bold text-white/70 mb-2">CEP</label>
-                                    <input name="shipping_zip" inputmode="numeric" pattern="[0-9]{8}" maxlength="9" required class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="00000-000">
-                                </div>
-                                <div class="sm:col-span-2">
-                                    <label class="block text-sm font-bold text-white/70 mb-2">Endereço</label>
-                                    <input name="shipping_address" required class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="Rua, número, bairro, cidade/UF">
-                                </div>
+                            <h3 class="text-xl font-black pt-4">Entrega Digital</h3>
+                            <div class="rounded-2xl border border-white/10 bg-black/30 p-4">
+                                <div class="text-white/70 font-semibold">Key + download do painel serão enviados para o Gmail e Discord informados.</div>
+                                <div class="text-white/40 text-sm font-semibold mt-1">Confira se está correto para evitar atraso na entrega.</div>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-bold text-white/70 mb-2">Número</label>
-                                    <input name="shipping_number" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="123">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-bold text-white/70 mb-2">Complemento</label>
-                                    <input name="shipping_complement" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="Apto, bloco... (opcional)">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-bold text-white/70 mb-2">Referência</label>
-                                    <input name="shipping_reference" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="Perto de... (opcional)">
-                                </div>
-                            </div>
-
-                            <h3 class="text-xl font-black pt-4">Frete</h3>
-                            <div id="shipping-box" class="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                <div class="text-white/60 font-semibold">Informe o CEP para calcular o frete.</div>
+                            <div>
+                                <label class="block text-sm font-bold text-white/70 mb-2">Discord</label>
+                                <input name="delivery_discord" required class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="usuario#0000 ou @usuario">
                             </div>
 
                             <div id="checkout-alert" class="hidden rounded-2xl border px-4 py-3 text-sm font-semibold"></div>
@@ -141,10 +120,6 @@ $isLogged = !empty($_SESSION['user_id']);
                                 <span>Subtotal</span>
                                 <span id="sum-subtotal">—</span>
                             </div>
-                            <div class="flex items-center justify-between text-white/70 font-semibold">
-                                <span>Frete</span>
-                                <span id="sum-shipping">—</span>
-                            </div>
                             <div class="flex items-center justify-between text-2xl font-black">
                                 <span>Total</span>
                                 <span id="sum-total" class="text-red-500">—</span>
@@ -158,7 +133,6 @@ $isLogged = !empty($_SESSION['user_id']);
 
     <script>
         const fmtMoney = (v) => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const onlyDigits = (s) => String(s || '').replace(/\D+/g, '');
 
         function showAlert(type, message) {
             const el = document.getElementById('checkout-alert');
@@ -170,7 +144,7 @@ $isLogged = !empty($_SESSION['user_id']);
             el.textContent = message;
         }
 
-        function renderOrder(items, subtotal, shippingPrice) {
+        function renderOrder(items, subtotal) {
             const list = document.getElementById('order-items');
             if (!list) return;
             list.innerHTML = items.map((it) => `
@@ -186,43 +160,12 @@ $isLogged = !empty($_SESSION['user_id']);
             `).join('');
 
             document.getElementById('sum-subtotal').textContent = fmtMoney(subtotal);
-            document.getElementById('sum-shipping').textContent = fmtMoney(shippingPrice);
-            document.getElementById('sum-total').textContent = fmtMoney(subtotal + shippingPrice);
+            document.getElementById('sum-total').textContent = fmtMoney(subtotal);
         }
 
         async function loadCart() {
             const res = await fetch('/api/cart.php?action=list', { credentials: 'same-origin' });
             return await res.json();
-        }
-
-        async function loadShipping(cepDigits) {
-            const res = await fetch('/api/shipping.php?cep=' + encodeURIComponent(cepDigits), { credentials: 'same-origin' });
-            return await res.json();
-        }
-
-        function renderShipping(options) {
-            const box = document.getElementById('shipping-box');
-            if (!box) return;
-            if (!options?.length) {
-                box.innerHTML = `<div class="text-white/60 font-semibold">Nenhuma opção de frete disponível.</div>`;
-                return;
-            }
-            box.innerHTML = `
-                <div class="space-y-3">
-                    ${options.map((o, idx) => `
-                        <label class="flex items-center justify-between gap-4 p-4 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
-                            <div class="flex items-center gap-3">
-                                <input type="radio" name="shipping_method" value="${o.id}" ${idx === 0 ? 'checked' : ''} class="h-5 w-5 accent-red-600">
-                                <div>
-                                    <div class="font-black">${o.label}</div>
-                                    <div class="text-white/60 text-sm font-semibold">${o.eta}</div>
-                                </div>
-                            </div>
-                            <div class="font-black text-white">${fmtMoney(o.price)}</div>
-                        </label>
-                    `).join('')}
-                </div>
-            `;
         }
 
         (async function init() {
@@ -235,65 +178,14 @@ $isLogged = !empty($_SESSION['user_id']);
                 return;
             }
 
-            let shippingOptions = [];
-            let selectedShippingPrice = 0;
-            renderShipping(null);
-            renderOrder(currentCart.items, Number(currentCart.total || 0), 0);
-
-            const cepInput = form.querySelector('input[name="shipping_zip"]');
-            const shippingBox = document.getElementById('shipping-box');
-
-            async function recalcShipping() {
-                const cepDigits = onlyDigits(cepInput?.value || '');
-                if (cepDigits.length !== 8) return;
-                const data = await loadShipping(cepDigits);
-                if (!data.success) {
-                    showAlert('error', data.message || 'Não foi possível calcular frete.');
-                    return;
-                }
-                shippingOptions = data.options || [];
-                renderShipping(shippingOptions);
-                selectedShippingPrice = Number(shippingOptions[0]?.price || 0);
-                renderOrder(currentCart.items, Number(currentCart.total || 0), selectedShippingPrice);
-            }
-
-            if (cepInput) {
-                cepInput.addEventListener('input', () => {
-                    const digits = onlyDigits(cepInput.value);
-                    if (digits.length === 8) recalcShipping();
-                });
-            }
-
-            if (shippingBox) {
-                shippingBox.addEventListener('change', (e) => {
-                    const t = e.target;
-                    if (t && t.name === 'shipping_method') {
-                        const opt = shippingOptions.find(o => o.id === t.value);
-                        selectedShippingPrice = Number(opt?.price || 0);
-                        renderOrder(currentCart.items, Number(currentCart.total || 0), selectedShippingPrice);
-                    }
-                });
-            }
+            renderOrder(currentCart.items, Number(currentCart.total || 0));
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 document.getElementById('btn-finish').disabled = true;
                 try {
-                    const cepDigits = onlyDigits(cepInput?.value || '');
-                    if (cepDigits.length !== 8) {
-                        showAlert('error', 'Informe um CEP válido.');
-                        return;
-                    }
-                    const selectedMethod = (form.querySelector('input[name="shipping_method"]:checked') || {}).value || '';
-                    if (!selectedMethod) {
-                        showAlert('error', 'Selecione uma opção de frete.');
-                        return;
-                    }
-
                     const payload = new FormData(form);
                     payload.set('action', 'create_order');
-                    payload.set('shipping_zip', cepDigits);
-                    payload.set('shipping_method', selectedMethod);
 
                     const res = await fetch('/api/checkout.php', { method: 'POST', body: payload, credentials: 'same-origin' });
                     const data = await res.json();

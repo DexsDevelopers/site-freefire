@@ -85,10 +85,11 @@ $lines[] = "Total: R$ " . number_format((float)($order['total'] ?? 0), 2, ',', '
 $customerName = (string)($order['customer_name'] ?? '');
 if ($customerName !== '') $lines[] = "Cliente: " . $customerName;
 $customerEmail = (string)($order['customer_email'] ?? '');
-if ($customerEmail !== '') $lines[] = "Email: " . $customerEmail;
-$shippingZip = (string)($order['shipping_zip'] ?? '');
-$shippingAddress = (string)($order['shipping_address'] ?? '');
-if ($shippingAddress !== '' || $shippingZip !== '') $lines[] = "Entrega: " . trim($shippingAddress . " CEP " . $shippingZip);
+$deliveryEmail = (string)($order['delivery_email'] ?? $customerEmail);
+if ($deliveryEmail !== '') $lines[] = "Gmail (entrega): " . $deliveryEmail;
+$deliveryDiscord = (string)($order['delivery_discord'] ?? '');
+if ($deliveryDiscord !== '') $lines[] = "Discord: " . $deliveryDiscord;
+$lines[] = "Entrega: Digital (key e download do painel)";
 
 $lines[] = " ";
 $lines[] = "Itens:";

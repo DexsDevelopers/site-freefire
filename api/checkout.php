@@ -106,6 +106,8 @@ function ensure_checkout_schema(mysqli $conn)
         "shipping_address" => "ALTER TABLE orders ADD COLUMN shipping_address VARCHAR(255) NULL",
         "shipping_cost" => "ALTER TABLE orders ADD COLUMN shipping_cost DECIMAL(10,2) NOT NULL DEFAULT 0",
         "shipping_method" => "ALTER TABLE orders ADD COLUMN shipping_method VARCHAR(50) NULL",
+        "delivery_email" => "ALTER TABLE orders ADD COLUMN delivery_email VARCHAR(120) NULL",
+        "delivery_discord" => "ALTER TABLE orders ADD COLUMN delivery_discord VARCHAR(120) NULL",
         "payment_method" => "ALTER TABLE orders ADD COLUMN payment_method VARCHAR(20) NOT NULL DEFAULT 'manual'",
         "payment_provider" => "ALTER TABLE orders ADD COLUMN payment_provider VARCHAR(40) NULL",
         "payment_status" => "ALTER TABLE orders ADD COLUMN payment_status VARCHAR(20) NOT NULL DEFAULT 'pending'",
@@ -153,37 +155,25 @@ if (!$items) {
 $customerName = trim((string)($_POST['customer_name'] ?? ''));
 $customerEmail = trim((string)($_POST['customer_email'] ?? ''));
 $customerPhone = trim((string)($_POST['customer_phone'] ?? ''));
-$shippingZip = sanitize_cep($_POST['shipping_zip'] ?? '');
-$shippingAddress = trim((string)($_POST['shipping_address'] ?? ''));
-$shippingNumber = trim((string)($_POST['shipping_number'] ?? ''));
-$shippingComplement = trim((string)($_POST['shipping_complement'] ?? ''));
-$shippingReference = trim((string)($_POST['shipping_reference'] ?? ''));
-$shippingMethod = trim((string)($_POST['shipping_method'] ?? ''));
+$deliveryDiscord = trim((string)($_POST['delivery_discord'] ?? $_POST['customer_discord'] ?? ''));
+$deliveryEmail = trim((string)($_POST['delivery_email'] ?? $customerEmail));
 
-if ($customerName === '' || $customerEmail === '' || $customerPhone === '') {
-    json_error('Preencha nome, e-mail e telefone.');
+if ($customerName === '' || $customerEmail === '' || $customerPhone === '' || $deliveryDiscord === '') {
+    json_error('Preencha nome, gmail, telefone e discord.');
 }
 if (!filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
     json_error('E-mail inválido.');
 }
-if (!$shippingZip || $shippingAddress === '' || $shippingMethod === '') {
-    json_error('Preencha os dados de entrega e selecione o frete.');
+if (!filter_var($deliveryEmail, FILTER_VALIDATE_EMAIL)) {
+    json_error('Gmail de entrega inválido.');
 }
 
 $cartSubtotal = cart_total($items);
-$shippingOpts = shipping_options($shippingZip, $cartSubtotal);
-$selected = null;
-foreach ($shippingOpts as $opt) {
-    if (($opt['id'] ?? '') === $shippingMethod) {
-        $selected = $opt;
-        break;
-    }
-}
-if (!$selected) {
-    json_error('Frete inválido.');
-}
-$shippingCost = (float)$selected['price'];
-$grandTotal = round($cartSubtotal + $shippingCost, 2);
+$shippingCost = 0.0;
+$shippingMethod = 'digital';
+$shippingZip = '';
+$addrFull = 'Entrega digital';
+$grandTotal = round($cartSubtotal, 2);
 
 $paymentMethod = (string)app_setting($conn, 'payment_method', 'manual');
 if ($paymentMethod !== 'api' && $paymentMethod !== 'manual') $paymentMethod = 'manual';
@@ -196,15 +186,10 @@ $userId = (int)$_SESSION['user_id'];
 $status = 'Pendente';
 $paymentStatus = 'pending';
 
-$addrFull = $shippingAddress;
-if ($shippingNumber !== '') $addrFull .= ', ' . $shippingNumber;
-if ($shippingComplement !== '') $addrFull .= ' - ' . $shippingComplement;
-if ($shippingReference !== '') $addrFull .= ' (' . $shippingReference . ')';
-
 $conn->begin_transaction();
 try {
-    $stmt = $conn->prepare("INSERT INTO orders (user_id, total, status, customer_name, customer_email, customer_phone, shipping_zip, shipping_address, shipping_cost, shipping_method, payment_method, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("idssssssdsss", $userId, $grandTotal, $status, $customerName, $customerEmail, $customerPhone, $shippingZip, $addrFull, $shippingCost, $shippingMethod, $paymentMethod, $paymentStatus);
+    $stmt = $conn->prepare("INSERT INTO orders (user_id, total, status, customer_name, customer_email, customer_phone, delivery_email, delivery_discord, shipping_zip, shipping_address, shipping_cost, shipping_method, payment_method, payment_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("idssssssssdsss", $userId, $grandTotal, $status, $customerName, $customerEmail, $customerPhone, $deliveryEmail, $deliveryDiscord, $shippingZip, $addrFull, $shippingCost, $shippingMethod, $paymentMethod, $paymentStatus);
     $stmt->execute();
     $orderId = (int)$stmt->insert_id;
 
@@ -296,10 +281,10 @@ try {
         $lines = [];
         $lines[] = "Pedido #" . $orderId;
         $lines[] = "Total: R$ " . number_format($grandTotal, 2, ',', '.');
-        $lines[] = "Frete: R$ " . number_format($shippingCost, 2, ',', '.');
         $lines[] = "Cliente: " . $customerName;
-        $lines[] = "Email: " . $customerEmail;
-        $lines[] = "Entrega: " . trim($addrFull . " CEP " . $shippingZip);
+        $lines[] = "Gmail (entrega): " . $deliveryEmail;
+        $lines[] = "Discord: " . $deliveryDiscord;
+        $lines[] = "Entrega: Digital (key e acesso ao painel)";
         $lines[] = " ";
         $lines[] = "Itens:";
         foreach ($items as $it) {
@@ -325,7 +310,7 @@ try {
         $html .= '<p>Seu comprovante em PDF vai anexado neste e-mail.</p>';
         $html .= '</div>';
 
-        $mailSent = mail_send_with_pdf($customerEmail, "Thunder Store - Pedido #" . $orderId, $html, $pdf, "pedido-$orderId.pdf", $fromEmail ?: null);
+        $mailSent = mail_send_with_pdf($deliveryEmail, "Thunder Store - Pedido #" . $orderId, $html, $pdf, "pedido-$orderId.pdf", $fromEmail ?: null);
     }
 
     if ($redirectUrl) {

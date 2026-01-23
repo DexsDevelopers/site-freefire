@@ -216,7 +216,7 @@ session_start();
                             <a href="/" class="w-full sm:w-auto text-center bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-3 px-6 rounded-full transition-all">
                                 CONTINUAR COMPRANDO
                             </a>
-                            <a href="/checkout.php" class="w-full sm:w-auto text-center bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(22,163,74,0.4)]">
+                            <a href="/checkout" class="w-full sm:w-auto text-center bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(22,163,74,0.4)]">
                                 FINALIZAR COMPRA
                             </a>
                         </div>

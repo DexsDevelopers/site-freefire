@@ -83,6 +83,8 @@ $shippingCost = (float)($order['shipping_cost'] ?? 0);
 $shippingMethod = (string)($order['shipping_method'] ?? '');
 $customerName = (string)($order['customer_name'] ?? ($_SESSION['user_name'] ?? ''));
 $customerEmail = (string)($order['customer_email'] ?? '');
+$deliveryEmail = (string)($order['delivery_email'] ?? $customerEmail);
+$deliveryDiscord = (string)($order['delivery_discord'] ?? '');
 $shippingZip = (string)($order['shipping_zip'] ?? '');
 $shippingAddress = (string)($order['shipping_address'] ?? '');
 
@@ -159,19 +161,16 @@ $manualInstructions = (string)app_setting($conn, 'manual_instructions', 'Finaliz
                 <div class="mt-4 space-y-2 text-white/70 font-semibold">
                     <div class="flex justify-between"><span>Status</span><span class="text-white"><?php echo htmlspecialchars((string)($order['status'] ?? '')); ?></span></div>
                     <div class="flex justify-between"><span>Cliente</span><span class="text-white"><?php echo htmlspecialchars($customerName); ?></span></div>
-                    <?php if ($customerEmail !== ''): ?>
-                        <div class="flex justify-between"><span>E-mail</span><span class="text-white"><?php echo htmlspecialchars($customerEmail); ?></span></div>
-                    <?php endif; ?>
-                    <?php if ($shippingZip !== '' || $shippingAddress !== ''): ?>
-                        <div class="pt-2">
-                            <div class="text-xs text-white/50 font-bold tracking-wide uppercase">Entrega</div>
-                            <div class="text-white mt-1"><?php echo htmlspecialchars(trim($shippingAddress . ' • CEP ' . $shippingZip)); ?></div>
-                        </div>
-                    <?php endif; ?>
-                    <div class="flex justify-between"><span>Frete</span><span class="text-white"><?php echo 'R$ ' . number_format($shippingCost, 2, ',', '.'); ?></span></div>
-                    <?php if ($shippingMethod !== ''): ?>
-                        <div class="flex justify-between"><span>Método</span><span class="text-white"><?php echo htmlspecialchars($shippingMethod); ?></span></div>
-                    <?php endif; ?>
+                    <div class="pt-2">
+                        <div class="text-xs text-white/50 font-bold tracking-wide uppercase">Entrega</div>
+                        <div class="text-white mt-1">Digital (key e download do painel)</div>
+                        <?php if ($deliveryEmail !== ''): ?>
+                            <div class="text-white/60 text-sm font-semibold mt-2">Gmail: <?php echo htmlspecialchars($deliveryEmail); ?></div>
+                        <?php endif; ?>
+                        <?php if ($deliveryDiscord !== ''): ?>
+                            <div class="text-white/60 text-sm font-semibold mt-1">Discord: <?php echo htmlspecialchars($deliveryDiscord); ?></div>
+                        <?php endif; ?>
+                    </div>
                     <div class="flex justify-between text-2xl font-black pt-2">
                         <span>Total</span>
                         <span class="text-red-500"><?php echo 'R$ ' . number_format((float)$order['total'], 2, ',', '.'); ?></span>
