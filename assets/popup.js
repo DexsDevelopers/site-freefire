@@ -212,6 +212,96 @@
       .replace(/'/g, '&#039;');
   }
 
+  function imageViewer(opts) {
+    const o = opts && typeof opts === 'object' ? opts : {};
+    const src = String(o.src || '').trim();
+    if (!src) return Promise.resolve(undefined);
+    const alt = String(o.alt || 'Imagem');
+    const title = String(o.title || 'Visualizar');
+    const caption = String(o.caption || '');
+
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'tp-overlay';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.tabIndex = -1;
+
+      const modal = document.createElement('div');
+      modal.className = 'tp-modal tp-image-modal';
+
+      modal.innerHTML = `
+        <div class="tp-modal__top">
+          <div class="tp-modal__head">
+            <div class="tp-modal__type">${ICONS.info}</div>
+            <h3 class="tp-modal__title">${escapeHtml(title)}</h3>
+          </div>
+          <button class="tp-modal__close" type="button" aria-label="Fechar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="tp-modal__body tp-image-body">
+          <div class="tp-image-frame">
+            <img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" loading="eager" />
+          </div>
+          ${caption ? `<div class="tp-image-caption">${escapeHtml(caption)}</div>` : ''}
+        </div>
+      `;
+
+      overlay.appendChild(modal);
+
+      const previousActive = document.activeElement;
+      document.body.classList.add('tp-lock-scroll');
+      document.body.appendChild(overlay);
+
+      function cleanup() {
+        document.body.classList.remove('tp-lock-scroll');
+        overlay.remove();
+        if (previousActive && typeof previousActive.focus === 'function') {
+          try { previousActive.focus(); } catch (_) {}
+        }
+        resolve(undefined);
+      }
+
+      const btnClose = modal.querySelector('.tp-modal__close');
+      const img = modal.querySelector('img');
+
+      function onKey(e) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          cleanup();
+          return;
+        }
+        if (e.key === 'Tab') trapFocus(e, modal);
+      }
+
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) cleanup();
+      });
+      btnClose && btnClose.addEventListener('click', cleanup);
+      img && img.addEventListener('click', (e) => { e.stopPropagation(); });
+      document.addEventListener('keydown', onKey, true);
+      setTimeout(() => { if (btnClose) btnClose.focus(); }, 0);
+    });
+  }
+
+  function bindImagePopups(root) {
+    const scope = root || document;
+    const items = scope.querySelectorAll('[data-tp-image]');
+    items.forEach((el) => {
+      if (el.__tpImgBound) return;
+      el.__tpImgBound = true;
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        const src = el.getAttribute('data-tp-image') || '';
+        const title = el.getAttribute('data-tp-image-title') || 'Visualizar';
+        const caption = el.getAttribute('data-tp-image-caption') || '';
+        const alt = el.getAttribute('data-tp-image-alt') || 'Imagem';
+        imageViewer({ src, title, caption, alt });
+      });
+    });
+  }
+
   function bindConfirmForms(root) {
     const scope = root || document;
     const forms = scope.querySelectorAll('form[data-confirm]');
@@ -259,11 +349,14 @@
     confirm: confirmDialog,
     modal: modalDialog,
     alert: alertDialog,
+    image: imageViewer,
+    bindImagePopups,
     bindConfirmForms,
     installPolyfill: installAlertConfirmPolyfill,
   };
 
   document.addEventListener('DOMContentLoaded', () => {
     bindConfirmForms(document);
+    bindImagePopups(document);
   });
 })();

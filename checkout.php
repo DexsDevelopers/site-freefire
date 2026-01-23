@@ -118,21 +118,36 @@ $isLogged = !empty($_SESSION['user_id']);
                                     </a>
                                 </div>
                                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <a href="/40f2de66-65cc-46ec-a72a-30f0ddb450f5.jpg" target="_blank" rel="noopener" class="block rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
+                                    <button type="button"
+                                            data-tp-image="/40f2de66-65cc-46ec-a72a-30f0ddb450f5.jpg"
+                                            data-tp-image-title="Exemplo 1"
+                                            data-tp-image-alt="Alerta de golpe no app do banco"
+                                            data-tp-image-caption="Se exibido no app, confirme os dados e clique na opção indicada."
+                                            class="block text-left rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
                                         <img src="/40f2de66-65cc-46ec-a72a-30f0ddb450f5.jpg" alt="Exemplo de alerta de golpe no app do banco" class="w-full h-44 object-cover" loading="lazy">
                                         <div class="px-3 py-2 text-xs text-white/60 font-semibold">Exemplo 1</div>
-                                    </a>
-                                    <a href="/25f05c2a-fae8-4c58-83d2-d713b43aa273.jpg" target="_blank" rel="noopener" class="block rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
+                                    </button>
+                                    <button type="button"
+                                            data-tp-image="/25f05c2a-fae8-4c58-83d2-d713b43aa273.jpg"
+                                            data-tp-image-title="Exemplo 2"
+                                            data-tp-image-alt="Alerta de segurança ao pagar PIX"
+                                            data-tp-image-caption="Se aparecer este aviso, clique na opção para pagar mesmo assim."
+                                            class="block text-left rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
                                         <img src="/25f05c2a-fae8-4c58-83d2-d713b43aa273.jpg" alt="Exemplo de alerta de segurança ao pagar PIX" class="w-full h-44 object-cover" loading="lazy">
                                         <div class="px-3 py-2 text-xs text-white/60 font-semibold">Exemplo 2</div>
-                                    </a>
-                                    <a href="/8fd2d8fb-32f8-4f89-9f67-e939bd07337d.jpg" target="_blank" rel="noopener" class="block rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
+                                    </button>
+                                    <button type="button"
+                                            data-tp-image="/8fd2d8fb-32f8-4f89-9f67-e939bd07337d.jpg"
+                                            data-tp-image-title="Exemplo 3"
+                                            data-tp-image-alt="Aviso de segurança antes de transferir"
+                                            data-tp-image-caption="Se o banco alertar, conclua apenas se os dados estiverem corretos."
+                                            class="block text-left rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
                                         <img src="/8fd2d8fb-32f8-4f89-9f67-e939bd07337d.jpg" alt="Exemplo de aviso de segurança antes de transferir" class="w-full h-44 object-cover" loading="lazy">
                                         <div class="px-3 py-2 text-xs text-white/60 font-semibold">Exemplo 3</div>
-                                    </a>
+                                    </button>
                                 </div>
                                 <div class="mt-3 text-xs text-white/40 font-semibold">
-                                    Dica: clique em uma imagem para abrir em tela cheia.
+                                    Dica: clique em uma imagem para abrir em popup.
                                 </div>
                             </div>
 
@@ -207,17 +222,30 @@ $isLogged = !empty($_SESSION['user_id']);
             const form = document.getElementById('checkout-form');
             if (!form) return;
 
-            let currentCart = await loadCart();
-            if (!currentCart?.success || !(currentCart.items || []).length) {
-                showAlert('error', 'Seu carrinho está vazio.');
-                return;
+            try {
+                let currentCart = await loadCart();
+                if (!currentCart?.success || !(currentCart.items || []).length) {
+                    showAlert('error', 'Seu carrinho está vazio.');
+                    document.getElementById('btn-finish').disabled = true;
+                } else {
+                    renderOrder(currentCart.items, Number(currentCart.total || 0));
+                }
+            } catch (e) {
+                console.error(e);
+                showAlert('error', 'Não foi possível carregar o carrinho. Recarregue a página.');
             }
-
-            renderOrder(currentCart.items, Number(currentCart.total || 0));
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                document.getElementById('btn-finish').disabled = true;
+                const btn = document.getElementById('btn-finish');
+                const originalText = btn ? btn.textContent : '';
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Processando...';
+                }
+                if (window.ThunderPopup && typeof window.ThunderPopup.toast === 'function') {
+                    window.ThunderPopup.toast('info', 'Aguarde, estamos criando seu pedido...');
+                }
                 try {
                     const payload = new FormData(form);
                     payload.set('action', 'create_order');
@@ -236,11 +264,15 @@ $isLogged = !empty($_SESSION['user_id']);
                         window.location.href = '/pedido.php?id=' + encodeURIComponent(data.order_id);
                         return;
                     }
+                    showAlert('error', 'Não foi possível finalizar.');
                 } catch (err) {
                     console.error(err);
                     showAlert('error', 'Erro ao processar checkout.');
                 } finally {
-                    document.getElementById('btn-finish').disabled = false;
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = originalText || 'Pagar e concluir';
+                    }
                 }
             });
         })();
