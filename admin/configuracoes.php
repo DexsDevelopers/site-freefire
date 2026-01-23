@@ -52,10 +52,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $flash = $ok ? ['type' => 'success', 'message' => 'Configurações salvas.'] : ['type' => 'error', 'message' => 'Não foi possível salvar.'];
         }
     }
+
+    if ($action === 'save_payment_settings') {
+        $method = (string)($_POST['payment_method'] ?? 'manual');
+        if ($method !== 'api' && $method !== 'manual') {
+            $method = 'manual';
+        }
+
+        $provider = (string)($_POST['payment_provider'] ?? 'stripe');
+        if ($provider !== 'stripe') {
+            $provider = 'stripe';
+        }
+
+        $mode = (string)($_POST['payment_mode'] ?? 'sandbox');
+        if ($mode !== 'sandbox' && $mode !== 'production') {
+            $mode = 'sandbox';
+        }
+
+        $publishable = trim((string)($_POST['payment_publishable_key'] ?? ''));
+        $secret = trim((string)($_POST['payment_secret_key'] ?? ''));
+        $webhookUrl = trim((string)($_POST['payment_webhook_url'] ?? ''));
+        $webhookSecret = trim((string)($_POST['payment_webhook_secret'] ?? ''));
+
+        $manualPixKey = trim((string)($_POST['manual_pix_key'] ?? ''));
+        $manualBank = trim((string)($_POST['manual_bank'] ?? ''));
+        $manualAgency = trim((string)($_POST['manual_agency'] ?? ''));
+        $manualAccount = trim((string)($_POST['manual_account'] ?? ''));
+        $manualBeneficiary = trim((string)($_POST['manual_beneficiary'] ?? ''));
+        $manualInstructions = trim((string)($_POST['manual_instructions'] ?? ''));
+
+        $mailFrom = trim((string)($_POST['mail_from'] ?? ''));
+
+        if ($method === 'api' && ($publishable === '' || $secret === '')) {
+            $flash = ['type' => 'error', 'message' => 'Informe Publishable Key e Secret Key para o pagamento via API.'];
+        } else {
+            $ok = true;
+            $ok = $ok && set_setting($conn, 'payment_method', $method);
+            $ok = $ok && set_setting($conn, 'payment_provider', $provider);
+            $ok = $ok && set_setting($conn, 'payment_mode', $mode);
+            $ok = $ok && set_setting($conn, 'payment_publishable_key', $publishable);
+            $ok = $ok && set_setting($conn, 'payment_secret_key', $secret);
+            $ok = $ok && set_setting($conn, 'payment_webhook_url', $webhookUrl);
+            $ok = $ok && set_setting($conn, 'payment_webhook_secret', $webhookSecret);
+
+            $ok = $ok && set_setting($conn, 'manual_pix_key', $manualPixKey);
+            $ok = $ok && set_setting($conn, 'manual_bank', $manualBank);
+            $ok = $ok && set_setting($conn, 'manual_agency', $manualAgency);
+            $ok = $ok && set_setting($conn, 'manual_account', $manualAccount);
+            $ok = $ok && set_setting($conn, 'manual_beneficiary', $manualBeneficiary);
+            $ok = $ok && set_setting($conn, 'manual_instructions', $manualInstructions);
+
+            $ok = $ok && set_setting($conn, 'mail_from', $mailFrom);
+            $flash = $ok ? ['type' => 'success', 'message' => 'Configurações de pagamento salvas.'] : ['type' => 'error', 'message' => 'Não foi possível salvar pagamento.'];
+        }
+    }
 }
 
 $affiliate_default_rate = (float)get_setting($conn, 'affiliate_default_rate', '0.10');
 $affiliate_payout_min = (float)get_setting($conn, 'affiliate_payout_min', '50.00');
+
+$payment_method = (string)get_setting($conn, 'payment_method', 'manual');
+$payment_provider = (string)get_setting($conn, 'payment_provider', 'stripe');
+$payment_mode = (string)get_setting($conn, 'payment_mode', 'sandbox');
+$payment_publishable_key = (string)get_setting($conn, 'payment_publishable_key', '');
+$payment_secret_key = (string)get_setting($conn, 'payment_secret_key', '');
+$payment_webhook_url = (string)get_setting($conn, 'payment_webhook_url', '');
+$payment_webhook_secret = (string)get_setting($conn, 'payment_webhook_secret', '');
+
+$manual_pix_key = (string)get_setting($conn, 'manual_pix_key', '');
+$manual_bank = (string)get_setting($conn, 'manual_bank', '');
+$manual_agency = (string)get_setting($conn, 'manual_agency', '');
+$manual_account = (string)get_setting($conn, 'manual_account', '');
+$manual_beneficiary = (string)get_setting($conn, 'manual_beneficiary', '');
+$manual_instructions = (string)get_setting($conn, 'manual_instructions', 'Finalize o pagamento via PIX/transferência e envie o comprovante para o suporte.');
+
+$mail_from = (string)get_setting($conn, 'mail_from', '');
 
 ob_start();
 ?>
@@ -108,7 +179,124 @@ ob_start();
             </div>
         </div>
     </div>
+
+    <div class="mt-6 rounded-2xl border border-admin-border bg-black/20 p-6">
+        <div class="text-sm font-black">Pagamento</div>
+        <div class="text-xs text-white/60 mt-1">Escolha entre API de pagamento ou pagamento manual</div>
+
+        <form method="post" class="mt-5 space-y-6" id="paymentForm">
+            <?php echo csrf_input(); ?>
+            <input type="hidden" name="action" value="save_payment_settings">
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <label class="rounded-xl border border-admin-border bg-black/30 p-4 flex items-start gap-3 cursor-pointer">
+                    <input type="radio" name="payment_method" value="api" class="mt-1" <?php echo $payment_method === 'api' ? 'checked' : ''; ?>>
+                    <div>
+                        <div class="font-black">API de Pagamento</div>
+                        <div class="text-xs text-white/60 mt-1">Stripe (cartão/pix conforme provedor)</div>
+                    </div>
+                </label>
+                <label class="rounded-xl border border-admin-border bg-black/30 p-4 flex items-start gap-3 cursor-pointer">
+                    <input type="radio" name="payment_method" value="manual" class="mt-1" <?php echo $payment_method !== 'api' ? 'checked' : ''; ?>>
+                    <div>
+                        <div class="font-black">Pagamento Manual</div>
+                        <div class="text-xs text-white/60 mt-1">PIX/transferência com instruções</div>
+                    </div>
+                </label>
+                <div class="rounded-xl border border-admin-border bg-black/30 p-4">
+                    <div class="text-xs text-white/60 font-bold">E-mail (envio do PDF)</div>
+                    <input name="mail_from" value="<?php echo h($mail_from); ?>" placeholder="no-reply@seudominio.com"
+                           class="mt-2 w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                </div>
+            </div>
+
+            <div id="payApiBox" class="rounded-2xl border border-admin-border bg-black/30 p-6">
+                <div class="text-sm font-black">API (Stripe)</div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-xs font-bold text-white/60 mb-2">Publishable Key</label>
+                        <input name="payment_publishable_key" value="<?php echo h($payment_publishable_key); ?>" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/60 mb-2">Secret Key</label>
+                        <input name="payment_secret_key" value="<?php echo h($payment_secret_key); ?>" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/60 mb-2">Modo</label>
+                        <select name="payment_mode" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                            <option value="sandbox" <?php echo $payment_mode === 'sandbox' ? 'selected' : ''; ?>>Sandbox/Teste</option>
+                            <option value="production" <?php echo $payment_mode === 'production' ? 'selected' : ''; ?>>Produção</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/60 mb-2">Provider</label>
+                        <select name="payment_provider" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                            <option value="stripe" <?php echo $payment_provider === 'stripe' ? 'selected' : ''; ?>>Stripe</option>
+                        </select>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-bold text-white/60 mb-2">Webhook URL (informativo)</label>
+                        <input name="payment_webhook_url" value="<?php echo h($payment_webhook_url); ?>" placeholder="https://seudominio.com/api/webhook_stripe.php"
+                               class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-bold text-white/60 mb-2">Webhook Secret (opcional)</label>
+                        <input name="payment_webhook_secret" value="<?php echo h($payment_webhook_secret); ?>"
+                               class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <div id="payManualBox" class="rounded-2xl border border-admin-border bg-black/30 p-6">
+                <div class="text-sm font-black">Manual</div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-bold text-white/60 mb-2">Chave PIX</label>
+                        <input name="manual_pix_key" value="<?php echo h($manual_pix_key); ?>" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/60 mb-2">Banco</label>
+                        <input name="manual_bank" value="<?php echo h($manual_bank); ?>" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/60 mb-2">Agência</label>
+                        <input name="manual_agency" value="<?php echo h($manual_agency); ?>" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/60 mb-2">Conta</label>
+                        <input name="manual_account" value="<?php echo h($manual_account); ?>" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-white/60 mb-2">Beneficiário</label>
+                        <input name="manual_beneficiary" value="<?php echo h($manual_beneficiary); ?>" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm">
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-bold text-white/60 mb-2">Instruções</label>
+                        <textarea name="manual_instructions" rows="4" class="w-full px-4 py-3 rounded-xl bg-black/40 border border-admin-border font-bold text-sm"><?php echo h($manual_instructions); ?></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button class="px-5 py-3 rounded-xl bg-admin-accent hover:bg-red-700 font-black">Salvar pagamento</button>
+        </form>
+    </div>
 </div>
+<script>
+    (function () {
+        const form = document.getElementById('paymentForm');
+        if (!form) return;
+        const apiBox = document.getElementById('payApiBox');
+        const manualBox = document.getElementById('payManualBox');
+        const radios = Array.from(form.querySelectorAll('input[name="payment_method"]'));
+        function update() {
+            const selected = (radios.find(r => r.checked) || {}).value || 'manual';
+            if (apiBox) apiBox.style.display = selected === 'api' ? '' : 'none';
+            if (manualBox) manualBox.style.display = selected === 'manual' ? '' : 'none';
+        }
+        radios.forEach(r => r.addEventListener('change', update));
+        update();
+    })();
+</script>
 <?php
 $content = ob_get_clean();
 render_admin_layout('Configurações', 'config', $content);

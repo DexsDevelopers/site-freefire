@@ -1,6 +1,9 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+  RewriteRule ^carrinho/?$ /carrinho.php [L]
+  RewriteRule ^checkout/?$ /checkout.php [L]
+  RewriteRule ^finalizar-compra/?$ /checkout.php [L]
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

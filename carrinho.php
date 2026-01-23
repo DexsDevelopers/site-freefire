@@ -1,10 +1,5 @@
 <?php
 session_start();
-$cart_items = $_SESSION['cart'] ?? [];
-$total = 0;
-foreach ($cart_items as $item) {
-    $total += $item['price'];
-}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -139,86 +134,152 @@ foreach ($cart_items as $item) {
 
     <div class="flex-grow pt-24 px-4 max-w-7xl mx-auto w-full">
         <h1 class="text-4xl font-bold mb-8 text-center"><span class="text-red-600">SEU</span> CARRINHO</h1>
-
-        <?php if (empty($cart_items)): ?>
-            <div class="text-center py-20">
-                <p class="text-xl text-gray-400 mb-6">Seu carrinho está vazio.</p>
-                <a href="/" class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(220,38,38,0.4)]">
-                    VER PRODUTOS
-                </a>
-            </div>
-        <?php else: ?>
-            <div class="bg-zinc-900/50 border border-red-900/20 rounded-xl p-6 mb-8">
-                <?php foreach ($cart_items as $index => $item): ?>
-                    <div class="flex flex-col md:flex-row justify-between items-center border-b border-gray-800 py-4 last:border-0">
-                        <div class="flex items-center gap-4 mb-4 md:mb-0">
-                            <div>
-                                <h3 class="text-xl font-bold text-white"><?php echo htmlspecialchars($item['product_name']); ?></h3>
-                                <p class="text-gray-400"><?php echo htmlspecialchars($item['plan_name']); ?></p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-6">
-                            <span class="text-2xl font-bold text-red-500">R$ <?php echo number_format($item['price'], 2, ',', '.'); ?></span>
-                            <button onclick="removeItem(<?php echo $index; ?>)" class="text-gray-500 hover:text-red-500 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-                
-                <div class="mt-8 flex flex-col md:flex-row justify-between items-center pt-6 border-t border-red-900/30">
-                    <div class="text-3xl font-bold mb-4 md:mb-0">
-                        Total: <span class="text-red-500">R$ <?php echo number_format($total, 2, ',', '.'); ?></span>
-                    </div>
-                    <button onclick="checkout()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(22,163,74,0.4)]">
-                        FINALIZAR COMPRA
-                    </button>
-                </div>
-            </div>
-        <?php endif; ?>
+        <div id="cart-root"></div>
     </div>
 
     <script>
-        async function removeItem(index) {
-            if (!confirm('Remover este item?')) return;
+        const fmtMoney = (v) => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        function escapeHtml(value) {
+            const s = String(value ?? '');
+            return s
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function itemTemplate(item) {
+            const img = item.product_image_url ? `<img src="${escapeHtml(item.product_image_url)}" alt="" class="h-16 w-16 rounded-lg object-cover border border-white/10 bg-white/5">` : `<div class="h-16 w-16 rounded-lg border border-white/10 bg-white/5"></div>`;
+            return `
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-white/10 py-5 last:border-0">
+                    <div class="flex items-center gap-4">
+                        ${img}
+                        <div>
+                            <div class="text-lg font-extrabold text-white">${escapeHtml(item.product_name)}</div>
+                            <div class="text-sm text-white/60 font-semibold">${escapeHtml(item.plan_name)}</div>
+                            <div class="text-xs text-white/40 mt-1">Unitário: ${fmtMoney(item.unit_price)}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                        <div class="inline-flex items-center rounded-full border border-white/10 bg-white/5">
+                            <button class="px-4 py-2 text-white/70 hover:text-white" data-action="dec" data-plan-id="${item.plan_id}" aria-label="Diminuir">−</button>
+                            <div class="min-w-12 text-center font-black">${item.qty}</div>
+                            <button class="px-4 py-2 text-white/70 hover:text-white" data-action="inc" data-plan-id="${item.plan_id}" aria-label="Aumentar">+</button>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="text-xs text-white/50 font-bold tracking-wide uppercase">Subtotal</div>
+                            <div class="text-2xl font-black text-red-500">${fmtMoney(item.subtotal)}</div>
+                        </div>
+
+                        <button class="text-white/40 hover:text-red-400 transition-colors" data-action="remove" data-plan-id="${item.plan_id}" aria-label="Remover">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCart(data) {
+            const root = document.getElementById('cart-root');
+            if (!root) return;
+
+            const items = data?.items || [];
+            if (!items.length) {
+                root.innerHTML = `
+                    <div class="text-center py-20">
+                        <p class="text-xl text-gray-400 mb-6">Seu carrinho está vazio.</p>
+                        <a href="/" class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+                            VER PRODUTOS
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            root.innerHTML = `
+                <div class="bg-zinc-900/50 border border-red-900/20 rounded-xl p-6 mb-8">
+                    ${items.map(itemTemplate).join('')}
+
+                    <div class="mt-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pt-6 border-t border-red-900/30">
+                        <div class="text-3xl font-bold">
+                            Total: <span class="text-red-500">${fmtMoney(data.total)}</span>
+                            <div class="text-sm text-white/50 font-semibold mt-2">${data.total_qty} item(ns)</div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                            <a href="/" class="w-full sm:w-auto text-center bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-3 px-6 rounded-full transition-all">
+                                CONTINUAR COMPRANDO
+                            </a>
+                            <a href="/checkout.php" class="w-full sm:w-auto text-center bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(22,163,74,0.4)]">
+                                FINALIZAR COMPRA
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function fetchCart() {
+            const res = await fetch('/api/cart.php?action=list', { credentials: 'same-origin' });
+            return await res.json();
+        }
+
+        async function updateQty(planId, delta) {
+            const formData = new FormData();
+            formData.append('action', 'update_qty');
+            formData.append('plan_id', String(planId));
+            formData.append('delta', String(delta));
+            const res = await fetch('/api/cart.php', { method: 'POST', body: formData, credentials: 'same-origin' });
+            return await res.json();
+        }
+
+        async function removePlan(planId) {
             const formData = new FormData();
             formData.append('action', 'remove');
-            formData.append('index', index);
-
-            try {
-                const response = await fetch('/api/cart.php', { method: 'POST', body: formData });
-                const data = await response.json();
-                if (data.success) location.reload();
-            } catch (error) { console.error(error); }
+            formData.append('plan_id', String(planId));
+            const res = await fetch('/api/cart.php', { method: 'POST', body: formData, credentials: 'same-origin' });
+            return await res.json();
         }
 
-        async function checkout() {
-            const formData = new FormData();
-            formData.append('action', 'checkout');
-
+        (async function initCart() {
             try {
-                const response = await fetch('/api/cart.php', { method: 'POST', body: formData });
-                const data = await response.json();
-                
-                if (data.redirect) {
-                    window.location.href = data.redirect;
-                } else if (data.success) {
-                    alert('Pedido #' + data.order_id + ' realizado com sucesso!');
-                    location.reload();
-                } else {
-                    alert(data.message);
+                const data = await fetchCart();
+                renderCart(data);
+            } catch (e) {
+                console.error(e);
+            }
+        })();
+
+        document.addEventListener('click', async (event) => {
+            const btn = event.target.closest('[data-action][data-plan-id]');
+            if (!btn) return;
+
+            const action = btn.getAttribute('data-action');
+            const planId = Number(btn.getAttribute('data-plan-id'));
+            if (!planId) return;
+
+            btn.disabled = true;
+            try {
+                let data;
+                if (action === 'inc') data = await updateQty(planId, +1);
+                else if (action === 'dec') data = await updateQty(planId, -1);
+                else if (action === 'remove') {
+                    if (!confirm('Remover este item?')) return;
+                    data = await removePlan(planId);
                 }
-            } catch (error) { console.error(error); }
-        }
-
-        async function logout() {
-            const formData = new FormData();
-            formData.append('action', 'logout');
-            await fetch('/api/auth.php', { method: 'POST', body: formData });
-            location.reload();
-        }
+                if (data?.success) renderCart(data);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+            }
+        });
 
         (function () {
             const toggle = document.getElementById('nav-mobile-toggle');
