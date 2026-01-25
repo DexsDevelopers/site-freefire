@@ -8,12 +8,15 @@ if (!isset($_SESSION['user_id'])) {
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Afiliados | Thunder Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -27,11 +30,15 @@ if (!isset($_SESSION['user_id'])) {
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
     <link rel="stylesheet" href="/assets/popup.css" />
     <style>
-        html, body { touch-action: pan-x pan-y; }
+        html,
+        body {
+            touch-action: pan-x pan-y;
+        }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
     <script src="/assets/popup.js" defer></script>
 </head>
+
 <body class="bg-black text-white min-h-screen font-sans">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -40,8 +47,11 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="text-white/60 text-sm mt-2">Convide pessoas, ganhe comissão e solicite saques.</div>
             </div>
             <div class="flex gap-2">
-                <a href="/painel" class="px-5 py-3 rounded-xl bg-white/5 border border-borderc hover:bg-white/10 font-black text-sm">Voltar</a>
-                <button id="btnEnable" class="hidden px-5 py-3 rounded-xl bg-accent hover:bg-red-700 font-black text-sm">Ativar afiliado</button>
+                <a href="/"
+                    class="px-5 py-3 rounded-xl bg-white/5 border border-borderc hover:bg-white/10 font-black text-sm">Voltar</a>
+                <button id="btnEnable"
+                    class="hidden px-5 py-3 rounded-xl bg-accent hover:bg-red-700 font-black text-sm">Ativar
+                    afiliado</button>
             </div>
         </div>
 
@@ -71,8 +81,11 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="text-lg font-black">Seu link</div>
                 <div class="text-xs text-white/60 mt-1">Use este link para divulgar.</div>
                 <div class="mt-5 flex flex-col sm:flex-row gap-3">
-                    <input id="refLink" readonly class="flex-1 px-4 py-3 rounded-xl bg-black/30 border border-borderc font-bold text-sm" value="Carregando...">
-                    <button id="btnCopy" class="px-5 py-3 rounded-xl bg-white/5 border border-borderc hover:bg-white/10 font-black text-sm">Copiar</button>
+                    <input id="refLink" readonly
+                        class="flex-1 px-4 py-3 rounded-xl bg-black/30 border border-borderc font-bold text-sm"
+                        value="Carregando...">
+                    <button id="btnCopy"
+                        class="px-5 py-3 rounded-xl bg-white/5 border border-borderc hover:bg-white/10 font-black text-sm">Copiar</button>
                 </div>
                 <div id="accInfo" class="mt-4 text-xs text-white/60"></div>
             </div>
@@ -83,19 +96,25 @@ if (!isset($_SESSION['user_id'])) {
                 <form id="payoutForm" class="mt-5 space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-white/60 mb-2">Valor</label>
-                        <input name="amount" type="number" step="0.01" min="0" class="w-full px-4 py-3 rounded-xl bg-black/30 border border-borderc focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 font-bold" placeholder="ex: 50.00">
+                        <input name="amount" type="number" step="0.01" min="0"
+                            class="w-full px-4 py-3 rounded-xl bg-black/30 border border-borderc focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 font-bold"
+                            placeholder="ex: 50.00">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-white/60 mb-2">Método</label>
-                        <select name="method" class="w-full px-4 py-3 rounded-xl bg-black/30 border border-borderc focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 font-bold">
+                        <select name="method"
+                            class="w-full px-4 py-3 rounded-xl bg-black/30 border border-borderc focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 font-bold">
                             <option value="pix">PIX</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-white/60 mb-2">Chave/Destino</label>
-                        <input name="destination" class="w-full px-4 py-3 rounded-xl bg-black/30 border border-borderc focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 font-bold" placeholder="ex: email, CPF, telefone">
+                        <input name="destination"
+                            class="w-full px-4 py-3 rounded-xl bg-black/30 border border-borderc focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 font-bold"
+                            placeholder="ex: email, CPF, telefone">
                     </div>
-                    <button class="w-full px-5 py-3 rounded-xl bg-accent hover:bg-red-700 font-black text-sm">Enviar solicitação</button>
+                    <button class="w-full px-5 py-3 rounded-xl bg-accent hover:bg-red-700 font-black text-sm">Enviar
+                        solicitação</button>
                     <div id="minInfo" class="text-xs text-white/50"></div>
                 </form>
             </div>
@@ -189,4 +208,5 @@ if (!isset($_SESSION['user_id'])) {
         loadAffiliate().catch(() => showAlert('error', 'Erro ao carregar afiliados.'));
     </script>
 </body>
+
 </html>

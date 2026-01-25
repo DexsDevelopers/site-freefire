@@ -80,8 +80,7 @@ if (!$dbOk || count($products) === 0) {
     <meta name="description" content="Produtos para vários jogos: entrega rápida, segurança e suporte." />
     <!-- <link rel="stylesheet" crossorigin href="/assets/index-R2RkWoEQ.css"> -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Russo+One&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -93,7 +92,8 @@ if (!$dbOk || count($products) === 0) {
                         'ff-red': '#DC2626',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Chakra Petch', 'sans-serif'],
+                        heading: ['Russo One', 'sans-serif'],
                     }
                 }
             }
@@ -141,6 +141,57 @@ if (!$dbOk || count($products) === 0) {
                 transition: none;
             }
         }
+
+        /* Custom Animations */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-float-delayed {
+            animation: float 6s ease-in-out 3s infinite;
+        }
+
+        @keyframes shine-sweep {
+            0% {
+                transform: translateX(-100%) skewX(-15deg);
+            }
+
+            100% {
+                transform: translateX(200%) skewX(-15deg);
+            }
+        }
+
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-shine::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: translateX(-100%) skewX(-15deg);
+        }
+
+        .btn-shine:hover::after {
+            animation: shine-sweep 0.75s;
+        }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
 </head>
@@ -148,13 +199,13 @@ if (!$dbOk || count($products) === 0) {
 <body class="bg-black text-white min-h-screen">
 
     <!-- Navbar -->
-    <nav
-        class="bg-black/80 backdrop-blur-md border-b border-white/10 fixed w-full z-50 transition-all duration-300 overflow-hidden">
-        <div class="absolute inset-0 pointer-events-none opacity-20"
-            style="background-image: url('data:image/svg+xml,%3Csvg width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cpath d=%27M11 11H9v2h2v2h2v-2h2v-2h-2V9h-2v2z%27 fill=%27%23ffffff%27 fill-rule=%27evenodd%27/%3E%3C/svg%3E'); background-size: 42px 42px;">
-        </div>
-        <div class="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/5 via-transparent to-transparent">
-        </div>
+    <nav class="fixed top-4 left-4 right-4 md:left-10 md:right-10 z-50 transition-all duration-300">
+        <div class="max-w-[1600px] mx-auto rounded-3xl bg-black/80 backdrop-blur-md border border-white/10 overflow-hidden relative shadow-2xl">
+            <div class="absolute inset-0 pointer-events-none opacity-20"
+                style="background-image: url('data:image/svg+xml,%3Csvg width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cpath d=%27M11 11H9v2h2v2h2v-2h2v-2h-2V9h-2v2z%27 fill=%27%23ffffff%27 fill-rule=%27evenodd%27/%3E%3C/svg%3E'); background-size: 42px 42px;">
+            </div>
+            <div class="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/5 via-transparent to-transparent">
+            </div>
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="flex items-center justify-between h-20">
                 <!-- Left: Icons + Logo -->
@@ -178,7 +229,7 @@ if (!$dbOk || count($products) === 0) {
                             </svg>
                         </a>
                         <?php if (isset($_SESSION['user_id'])): ?>
-                            <a href="/painel"
+                            <a href="/perfil.php"
                                 class="hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/10"
                                 title="Perfil">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
@@ -332,8 +383,10 @@ if (!$dbOk || count($products) === 0) {
                 style="background-image: url('data:image/svg+xml,%3Csvg width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 11H9v2h2v2h2v-2h2v-2h-2V9h-2v2z\' fill=\'%23ffffff\' fill-rule=\'evenodd\'/%3E%3C/svg%3E'); background-size: 40px 40px;">
             </div>
             <!-- White/Gray glow spots for Thunder theme -->
-            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-[128px]"></div>
-            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[128px]"></div>
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-[128px] animate-float"></div>
+            <div
+                class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[128px] animate-float-delayed">
+            </div>
         </div>
 
         <div
@@ -341,7 +394,7 @@ if (!$dbOk || count($products) === 0) {
             <!-- Content -->
             <div class="space-y-8 flex flex-col items-center max-w-4xl mx-auto">
                 <!-- Image as Title -->
-                <div class="relative flex justify-center w-full">
+                <div class="relative flex justify-center w-full reveal is-in">
                     <img src="/logo-thunder.png" alt="THUNDER STORE"
                         class="w-full max-w-3xl drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] transform hover:scale-105 transition-transform duration-500"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
@@ -352,15 +405,17 @@ if (!$dbOk || count($products) === 0) {
                     </h1>
                 </div>
 
-                <p class="text-gray-400 text-lg md:text-2xl max-w-2xl font-medium leading-relaxed">
+                <p class="text-gray-400 text-lg md:text-2xl max-w-2xl font-medium leading-relaxed reveal is-in"
+                    style="transition-delay: 100ms;">
                     A melhor loja de Free Fire do cenário.
                     <br />
                     Produtos exclusivos, entrega rápida e segurança total.
                 </p>
 
-                <div class="flex flex-col sm:flex-row gap-6 justify-center w-full">
+                <div class="flex flex-col sm:flex-row gap-6 justify-center w-full reveal is-in"
+                    style="transition-delay: 200ms;">
                     <a href="#produtos"
-                        class="bg-white text-black hover:bg-gray-200 font-bold py-4 px-10 rounded-full flex items-center justify-center gap-2 transition-all uppercase tracking-wide text-sm sm:text-base hover:-translate-y-1 shadow-lg group">
+                        class="btn-shine bg-white text-black hover:bg-gray-200 font-bold py-4 px-10 rounded-full flex items-center justify-center gap-2 transition-all uppercase tracking-wide text-sm sm:text-base hover:-translate-y-1 shadow-lg group">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -371,12 +426,12 @@ if (!$dbOk || count($products) === 0) {
                     </a>
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <a href="/painel"
-                            class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,0,51,0.4)] hover:shadow-[0_0_30px_rgba(255,0,51,0.6)] transition-all uppercase tracking-wide text-sm sm:text-base hover:-translate-y-1">
+                            class="btn-shine bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,0,51,0.4)] hover:shadow-[0_0_30px_rgba(255,0,51,0.6)] transition-all uppercase tracking-wide text-sm sm:text-base hover:-translate-y-1">
                             Acessar Painel
                         </a>
                     <?php else: ?>
                         <a href="/login.php"
-                            class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,0,51,0.4)] hover:shadow-[0_0_30px_rgba(255,0,51,0.6)] transition-all uppercase tracking-wide text-sm sm:text-base hover:-translate-y-1">
+                            class="btn-shine bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-full flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,0,51,0.4)] hover:shadow-[0_0_30px_rgba(255,0,51,0.6)] transition-all uppercase tracking-wide text-sm sm:text-base hover:-translate-y-1">
                             Acessar Painel
                         </a>
                     <?php endif; ?>
@@ -631,14 +686,16 @@ if (!$dbOk || count($products) === 0) {
                                             <?php echo htmlspecialchars($product['name']); ?>
                                         </h3>
                                         <div class="text-xs text-white/60 font-semibold mt-1">
-                                            <?php echo htmlspecialchars($product['slug']); ?></div>
+                                            <?php echo htmlspecialchars($product['slug']); ?>
+                                        </div>
                                     </div>
                                     <?php if ($minPrice > 0): ?>
                                         <div class="text-right">
                                             <div class="text-[10px] uppercase tracking-widest text-white/50 font-bold">a partir
                                                 de</div>
                                             <div class="text-lg font-black text-white">R$
-                                                <?php echo number_format($minPrice, 2, ',', '.'); ?></div>
+                                                <?php echo number_format($minPrice, 2, ',', '.'); ?>
+                                            </div>
                                         </div>
                                     <?php endif; ?>
                                 </div>

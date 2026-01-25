@@ -163,6 +163,47 @@ try {
         } else {
             echo json_encode(['success' => false, 'message' => 'Usuário não encontrado.']);
         }
+    } elseif ($action === 'update_profile') {
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['success' => false, 'message' => 'Não autorizado.']);
+            exit;
+        }
+
+        $userId = (int) $_SESSION['user_id'];
+        $name = $_POST['name'] ?? '';
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+
+        if (empty($name) || empty($email)) {
+            echo json_encode(['success' => false, 'message' => 'Nome e Email são obrigatórios.']);
+            exit;
+        }
+
+        // Verifica se email já em uso por outro usuário
+        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+        $stmt->bind_param("si", $email, $userId);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows > 0) {
+            echo json_encode(['success' => false, 'message' => 'Email já está em uso.']);
+            exit;
+        }
+
+        if (!empty($password)) {
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $conn->prepare("UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?");
+            $stmt->bind_param("sssi", $name, $email, $hash, $userId);
+        } else {
+            $stmt = $conn->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
+            $stmt->bind_param("ssi", $name, $email, $userId);
+        }
+
+        if ($stmt->execute()) {
+            $_SESSION['user_name'] = $name;
+            echo json_encode(['success' => true, 'message' => 'Perfil atualizado com sucesso!']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erro ao atualizar: ' . $stmt->error]);
+        }
+
     } elseif ($action === 'logout') {
         session_destroy();
         header("Location: /login.php");
