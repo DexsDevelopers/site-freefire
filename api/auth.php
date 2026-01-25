@@ -70,19 +70,47 @@ try {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         $affiliate_user_id = (int) ($_SESSION['affiliate_user_id'] ?? 0);
 
-        if ($hasReferredBy && $affiliate_user_id > 0) {
-            $stmt = $conn->prepare("INSERT INTO users (name, email, password, referred_by) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("sssi", $name, $email, $password_hash, $affiliate_user_id);
-        } else {
-            $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $name, $email, $password_hash);
+        // Verifica existência da coluna username
+        $hasUsername = db_has_column($conn, 'users', 'username');
+
+        // Contrução dinâmica do INSERT
+        $cols = ['name', 'email', 'password'];
+        $params = [$name, $email, $password_hash];
+        $types = 'sss';
+
+        if ($hasUsername) {
+            $cols[] = 'username';
+            // Gera username único baseado no email
+            $baseUser = explode('@', $email)[0];
+            // Remove caracteres especiais
+            $baseUser = preg_replace('/[^a-zA-Z0-9]/', '', $baseUser);
+            // Adiciona sufixo aleatório curto para garantir unicidade
+            $username = $baseUser . rand(100, 999);
+
+            $params[] = $username;
+            $types .= 's';
         }
+
+        if ($hasReferredBy && $affiliate_user_id > 0) {
+            $cols[] = 'referred_by';
+            $params[] = $affiliate_user_id;
+            $types .= 'i';
+        }
+
+        $sql = "INSERT INTO users (" . implode(', ', $cols) . ") VALUES (" . implode(', ', array_fill(0, count($cols), '?')) . ")";
+        $stmt = $conn->prepare($sql);
+
+        // Bind dinâmico
+        $stmt->bind_param($types, ...$params);
 
         if ($stmt->execute()) {
             session_regenerate_id(true);
             $newUserId = (int) $stmt->insert_id;
             $_SESSION['user_id'] = $newUserId;
             $_SESSION['user_name'] = $name;
+            if ($hasUsername) {
+                $_SESSION['user_username'] = $username;
+            }
             if ($hasRole) {
                 $_SESSION['user_role'] = 'user';
                 $_SESSION['is_admin'] = false;
@@ -96,7 +124,12 @@ try {
 
             echo json_encode(['success' => true, 'message' => 'Cadastro realizado com sucesso!']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar: ' . $stmt->error]);
+            // Tratamento específico para erro de duplicidade que possa ter escapado
+            if ($conn->errno == 1062) {
+                echo json_encode(['success' => false, 'message' => 'Erro: Dados duplicados (Email ou usuário já existem).']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar: ' . $stmt->error]);
+            }
         }
     } elseif ($action === 'login') {
         $email = $_POST['email'] ?? '';
