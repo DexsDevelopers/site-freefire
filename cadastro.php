@@ -11,7 +11,8 @@ session_start();
     <title>Cadastro | Thunder Store</title>
     <!-- <link rel="stylesheet" href="/assets/index-R2RkWoEQ.css"> -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
         rel="stylesheet">
     <script>
         tailwind.config = {
@@ -24,7 +25,8 @@ session_start();
                         'ff-red': '#DC2626',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Chakra Petch', 'sans-serif'],
+                        display: ['Rajdhani', 'sans-serif'],
                     }
                 }
             }
@@ -217,8 +219,19 @@ session_start();
     </nav>
 
     <div class="flex-grow flex items-center justify-center pt-24 px-4">
-        <div class="max-w-md w-full bg-zinc-900/80 border border-red-900/30 p-8 rounded-xl shadow-2xl backdrop-blur-md">
-            <h2 class="text-3xl font-bold text-center mb-8">Cadastro</h2>
+        <div
+            class="max-w-md w-full bg-black/40 border border-white/10 p-8 rounded-2xl shadow-[0_0_50px_rgba(220,38,38,0.15)] backdrop-blur-xl relative overflow-hidden group">
+            <div
+                class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+            </div>
+            <div
+                class="absolute -top-24 -right-24 w-48 h-48 bg-red-600/20 rounded-full blur-[60px] pointer-events-none">
+            </div>
+
+            <h2
+                class="text-4xl font-display font-bold text-center mb-8 uppercase tracking-wider text-white drop-shadow-lg">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Cadastro</span>
+            </h2>
             <form id="registerForm" class="space-y-6">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-400">Nome</label>

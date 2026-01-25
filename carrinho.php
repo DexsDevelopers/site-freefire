@@ -11,7 +11,8 @@ session_start();
     <title>Carrinho | Thunder Store</title>
     <!-- <link rel="stylesheet" href="/assets/index-R2RkWoEQ.css"> -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
         rel="stylesheet">
     <script>
         tailwind.config = {
@@ -24,7 +25,8 @@ session_start();
                         'ff-red': '#DC2626',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Chakra Petch', 'sans-serif'],
+                        display: ['Rajdhani', 'sans-serif'],
                     }
                 }
             }

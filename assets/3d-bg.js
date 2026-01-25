@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // SCENE SETUP
     const scene = new THREE.Scene();
     // No background color, let transparency show through to CSS background
-    
+
     // CAMERA
     const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
     camera.position.z = 5;
@@ -17,10 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
     container.appendChild(renderer.domElement);
 
     // OBJECTS (Thunder Theme: Geometric shapes)
-    const geometry = new THREE.IcosahedronGeometry(1, 0);
-    
+    const isMobile = window.innerWidth < 768;
+    const geometry = new THREE.IcosahedronGeometry(isMobile ? 0.6 : 1, 0);
+    const particleCount = isMobile ? 6 : 15; // Reduce count significantly on mobile
+
     // Material 1: Red Wireframe
-    const materialWire = new THREE.MeshBasicMaterial({ 
+    const materialWire = new THREE.MeshBasicMaterial({
         color: 0xdc2626, // Red-600
         wireframe: true,
         transparent: true,
@@ -37,11 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Create multiple shapes
     const shapes = [];
-    
-    for (let i = 0; i < 15; i++) {
+
+    for (let i = 0; i < particleCount; i++) {
         const isWire = Math.random() > 0.5;
         const mesh = new THREE.Mesh(
-            geometry, 
+            geometry,
             isWire ? materialWire : materialSolid
         );
 

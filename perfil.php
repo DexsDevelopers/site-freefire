@@ -28,7 +28,8 @@ if (!$user) {
         content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Meu Perfil | Thunder Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
         rel="stylesheet">
     <script>
         tailwind.config = {
@@ -40,7 +41,10 @@ if (!$user) {
                         'ff-gray': '#1F1F1F',
                         'ff-red': '#DC2626',
                     },
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                    fontFamily: {
+                        sans: ['Chakra Petch', 'sans-serif'],
+                        display: ['Rajdhani', 'sans-serif'],
+                    }
                 }
             }
         }

@@ -75,7 +75,8 @@ $planCount = count($plans);
     <title>Comprar <?php echo htmlspecialchars($product['name']); ?> - Thunder Store</title>
     <!-- <link rel="stylesheet" crossorigin href="/assets/index-R2RkWoEQ.css"> -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
         rel="stylesheet">
     <script>
         tailwind.config = {
@@ -88,7 +89,8 @@ $planCount = count($plans);
                         'ff-red': '#DC2626',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Chakra Petch', 'sans-serif'],
+                        display: ['Rajdhani', 'sans-serif'],
                     }
                 }
             }
@@ -337,7 +339,8 @@ $planCount = count($plans);
                         <div class="mt-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                             <div>
                                 <h1 class="text-4xl md:text-5xl font-black tracking-tight uppercase">
-                                    <?php echo htmlspecialchars($product['name']); ?></h1>
+                                    <?php echo htmlspecialchars($product['name']); ?>
+                                </h1>
                                 <p class="text-white/60 mt-2 max-w-2xl">Escolha o melhor plano e finalize em segundos.
                                 </p>
                             </div>
@@ -347,7 +350,8 @@ $planCount = count($plans);
                                         <div class="text-[10px] uppercase tracking-[0.22em] text-white/50 font-black">a
                                             partir de</div>
                                         <div class="text-lg font-black">R$
-                                            <?php echo number_format((float) $minPrice, 2, ',', '.'); ?></div>
+                                            <?php echo number_format((float) $minPrice, 2, ',', '.'); ?>
+                                        </div>
                                     </div>
                                 <?php endif; ?>
                                 <div class="px-4 py-2 rounded-2xl glass">
