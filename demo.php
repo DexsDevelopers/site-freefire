@@ -228,18 +228,13 @@ session_start();
             <div class="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
                     <div class="aspect-video bg-black/60 flex items-center justify-center">
-                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/cf1-KhDS3Wc"
+                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/cf1-KhDS3Wc?vq=hd1080"
                             title="YouTube video player" frameborder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             allowfullscreen>
                         </iframe>
                     </div>
-                    <div class="p-6">
-                        <div class="text-xs text-gray-400 font-bold tracking-widest uppercase">Sugestão</div>
-                        <div class="mt-2 text-white font-black text-xl">Tutorial rápido de instalação</div>
-                        <div class="mt-2 text-gray-300 text-sm leading-relaxed">Envie seu link de vídeo que eu deixo
-                            integrado aqui com embed e layout igual ao resto do site.</div>
-                    </div>
+
                 </div>
 
                 <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
