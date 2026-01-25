@@ -44,9 +44,12 @@ session_start();
         }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/assets/3d-bg.js" defer></script>
 </head>
 
-<body class="bg-black text-white min-h-screen flex flex-col">
+<body class="bg-black text-white min-h-screen flex flex-col relative">
+    <div id="canvas-3d" class="fixed inset-0 w-full h-full z-0 opacity-40 pointer-events-none"></div>
     <!-- Navbar -->
     <nav
         class="bg-black/80 backdrop-blur-md border-b border-white/10 fixed w-full z-50 transition-all duration-300 overflow-hidden">

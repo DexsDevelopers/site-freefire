@@ -4,12 +4,15 @@ $isLogged = !empty($_SESSION['user_id']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Finalizar Compra | Thunder Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -28,31 +31,56 @@ $isLogged = !empty($_SESSION['user_id']);
     <link rel="icon" type="image/png" href="/logo-thunder.png" />
     <link rel="stylesheet" href="/assets/popup.css?v=20260123" />
     <style>
-        html, body { touch-action: pan-x pan-y; }
-        body { background-color: #000; color: white; font-family: 'Inter', sans-serif; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
+        html,
+        body {
+            touch-action: pan-x pan-y;
+        }
+
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
     <script src="/assets/popup.js?v=20260123" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/assets/3d-bg.js" defer></script>
 </head>
-<body class="bg-black text-white min-h-screen">
+
+<body class="bg-black text-white min-h-screen relative">
+    <div id="canvas-3d" class="fixed inset-0 w-full h-full z-0 opacity-40 pointer-events-none"></div>
     <nav class="bg-black/80 backdrop-blur-md border-b border-white/10 fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="h-20 flex items-center justify-between">
                 <a href="/" class="flex items-center gap-3">
-                    <img src="/logo-thunder.png" alt="Thunder Store" class="h-10 w-10 rounded-xl border border-white/10 bg-black/50 object-contain">
+                    <img src="/logo-thunder.png" alt="Thunder Store"
+                        class="h-10 w-10 rounded-xl border border-white/10 bg-black/50 object-contain">
                     <div class="leading-tight">
                         <div class="font-black tracking-wide">THUNDER STORE</div>
                         <div class="text-xs text-white/60 font-semibold">Finalizar compra</div>
                     </div>
                 </a>
                 <div class="flex items-center gap-3">
-                    <a href="/carrinho.php" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-bold text-sm">Voltar ao carrinho</a>
+                    <a href="/carrinho.php"
+                        class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-bold text-sm">Voltar
+                        ao carrinho</a>
                     <?php if ($isLogged): ?>
-                        <a href="/painel" class="px-4 py-2 rounded-xl bg-ff-red hover:bg-red-700 font-black text-sm">Painel</a>
+                        <a href="/painel"
+                            class="px-4 py-2 rounded-xl bg-ff-red hover:bg-red-700 font-black text-sm">Painel</a>
                     <?php else: ?>
-                        <a href="/login.php" class="px-4 py-2 rounded-xl bg-ff-red hover:bg-red-700 font-black text-sm">Login</a>
+                        <a href="/login.php"
+                            class="px-4 py-2 rounded-xl bg-ff-red hover:bg-red-700 font-black text-sm">Login</a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -63,16 +91,22 @@ $isLogged = !empty($_SESSION['user_id']);
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-10">
                 <h1 class="text-3xl md:text-5xl font-black uppercase tracking-wider">Finalizar Compra</h1>
-                <p class="text-white/60 mt-3 font-semibold">Produto digital: receba key e download no Gmail e Discord.</p>
+                <p class="text-white/60 mt-3 font-semibold">Produto digital: receba key e download no Gmail e Discord.
+                </p>
             </div>
 
             <?php if (!$isLogged): ?>
                 <div class="max-w-2xl mx-auto rounded-2xl border border-white/10 bg-white/5 p-8">
                     <div class="text-xl font-black">Faça login para continuar</div>
-                    <div class="text-white/60 mt-2 font-semibold">Para segurança e acompanhamento do pedido, é necessário estar logado.</div>
+                    <div class="text-white/60 mt-2 font-semibold">Para segurança e acompanhamento do pedido, é necessário
+                        estar logado.</div>
                     <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                        <a href="/login.php" class="flex-1 text-center px-6 py-3 rounded-xl bg-ff-red hover:bg-red-700 font-black">Ir para Login</a>
-                        <a href="/cadastro.php" class="flex-1 text-center px-6 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-black">Criar conta</a>
+                        <a href="/login.php"
+                            class="flex-1 text-center px-6 py-3 rounded-xl bg-ff-red hover:bg-red-700 font-black">Ir para
+                            Login</a>
+                        <a href="/cadastro.php"
+                            class="flex-1 text-center px-6 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 font-black">Criar
+                            conta</a>
                     </div>
                 </div>
             <?php else: ?>
@@ -82,67 +116,82 @@ $isLogged = !empty($_SESSION['user_id']);
                         <form id="checkout-form" class="mt-6 space-y-4">
                             <div>
                                 <label class="block text-sm font-bold text-white/70 mb-2">Nome completo</label>
-                                <input name="customer_name" required class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="Seu nome completo">
+                                <input name="customer_name" required
+                                    class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold"
+                                    placeholder="Seu nome completo">
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-bold text-white/70 mb-2">Gmail (Entrega)</label>
-                                    <input name="customer_email" type="email" required class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="seugmail@gmail.com">
+                                    <input name="customer_email" type="email" required
+                                        class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold"
+                                        placeholder="seugmail@gmail.com">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-white/70 mb-2">Telefone</label>
-                                    <input name="customer_phone" required class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="(11) 99999-9999">
+                                    <input name="customer_phone" required
+                                        class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold"
+                                        placeholder="(11) 99999-9999">
                                 </div>
                             </div>
 
                             <h3 class="text-xl font-black pt-4">Entrega Digital</h3>
                             <div class="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                <div class="text-white/70 font-semibold">Key + download do painel serão enviados para o Gmail e Discord informados.</div>
-                                <div class="text-white/40 text-sm font-semibold mt-1">Confira se está correto para evitar atraso na entrega.</div>
+                                <div class="text-white/70 font-semibold">Key + download do painel serão enviados para o
+                                    Gmail e Discord informados.</div>
+                                <div class="text-white/40 text-sm font-semibold mt-1">Confira se está correto para evitar
+                                    atraso na entrega.</div>
                             </div>
 
                             <div>
                                 <label class="block text-sm font-bold text-white/70 mb-2">Discord</label>
-                                <input name="delivery_discord" required class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold" placeholder="usuario#0000 ou @usuario">
+                                <input name="delivery_discord" required
+                                    class="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-ff-red/40 font-semibold"
+                                    placeholder="usuario#0000 ou @usuario">
                             </div>
 
                             <div class="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                <div class="text-xs text-white/50 font-black tracking-wide uppercase">Aviso de Segurança (PIX)</div>
+                                <div class="text-xs text-white/50 font-black tracking-wide uppercase">Aviso de Segurança
+                                    (PIX)</div>
                                 <div class="mt-2 text-white/70 font-semibold leading-relaxed">
-                                    Se o seu banco exibir um alerta de segurança/possível golpe, <span class="text-white">confira os dados do recebedor</span> antes de confirmar.
-                                    Se estiver em dúvida, <span class="text-white">não transfira</span> e abra um ticket no nosso Discord para suporte.
+                                    Se o seu banco exibir um alerta de segurança/possível golpe, <span
+                                        class="text-white">confira os dados do recebedor</span> antes de confirmar.
+                                    Se estiver em dúvida, <span class="text-white">não transfira</span> e abra um ticket no
+                                    nosso Discord para suporte.
                                 </div>
                                 <div class="mt-3">
-                                    <a href="https://discord.gg/hpjCtT7CU7" target="_blank" rel="noopener" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-ff-red hover:bg-red-700 font-black text-sm">
+                                    <a href="https://discord.gg/hpjCtT7CU7" target="_blank" rel="noopener"
+                                        class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-ff-red hover:bg-red-700 font-black text-sm">
                                         Abrir ticket no Discord
                                     </a>
                                 </div>
                                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <button type="button"
-                                            data-tp-image="/40f2de66-65cc-46ec-a72a-30f0ddb450f5.jpg"
-                                            data-tp-image-title="Exemplo 1"
-                                            data-tp-image-alt="Alerta de golpe no app do banco"
-                                            data-tp-image-caption="Se exibido no app, confirme os dados e clique na opção indicada."
-                                            class="block text-left rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
-                                        <img src="/40f2de66-65cc-46ec-a72a-30f0ddb450f5.jpg" alt="Exemplo de alerta de golpe no app do banco" class="w-full h-44 object-cover" loading="lazy">
+                                    <button type="button" data-tp-image="/40f2de66-65cc-46ec-a72a-30f0ddb450f5.jpg"
+                                        data-tp-image-title="Exemplo 1" data-tp-image-alt="Alerta de golpe no app do banco"
+                                        data-tp-image-caption="Se exibido no app, confirme os dados e clique na opção indicada."
+                                        class="block text-left rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
+                                        <img src="/40f2de66-65cc-46ec-a72a-30f0ddb450f5.jpg"
+                                            alt="Exemplo de alerta de golpe no app do banco"
+                                            class="w-full h-44 object-cover" loading="lazy">
                                         <div class="px-3 py-2 text-xs text-white/60 font-semibold">Exemplo 1</div>
                                     </button>
-                                    <button type="button"
-                                            data-tp-image="/25f05c2a-fae8-4c58-83d2-d713b43aa273.jpg"
-                                            data-tp-image-title="Exemplo 2"
-                                            data-tp-image-alt="Alerta de segurança ao pagar PIX"
-                                            data-tp-image-caption="Se aparecer este aviso, clique na opção para pagar mesmo assim."
-                                            class="block text-left rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
-                                        <img src="/25f05c2a-fae8-4c58-83d2-d713b43aa273.jpg" alt="Exemplo de alerta de segurança ao pagar PIX" class="w-full h-44 object-cover" loading="lazy">
+                                    <button type="button" data-tp-image="/25f05c2a-fae8-4c58-83d2-d713b43aa273.jpg"
+                                        data-tp-image-title="Exemplo 2" data-tp-image-alt="Alerta de segurança ao pagar PIX"
+                                        data-tp-image-caption="Se aparecer este aviso, clique na opção para pagar mesmo assim."
+                                        class="block text-left rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
+                                        <img src="/25f05c2a-fae8-4c58-83d2-d713b43aa273.jpg"
+                                            alt="Exemplo de alerta de segurança ao pagar PIX"
+                                            class="w-full h-44 object-cover" loading="lazy">
                                         <div class="px-3 py-2 text-xs text-white/60 font-semibold">Exemplo 2</div>
                                     </button>
-                                    <button type="button"
-                                            data-tp-image="/8fd2d8fb-32f8-4f89-9f67-e939bd07337d.jpg"
-                                            data-tp-image-title="Exemplo 3"
-                                            data-tp-image-alt="Aviso de segurança antes de transferir"
-                                            data-tp-image-caption="Se o banco alertar, conclua apenas se os dados estiverem corretos."
-                                            class="block text-left rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
-                                        <img src="/8fd2d8fb-32f8-4f89-9f67-e939bd07337d.jpg" alt="Exemplo de aviso de segurança antes de transferir" class="w-full h-44 object-cover" loading="lazy">
+                                    <button type="button" data-tp-image="/8fd2d8fb-32f8-4f89-9f67-e939bd07337d.jpg"
+                                        data-tp-image-title="Exemplo 3"
+                                        data-tp-image-alt="Aviso de segurança antes de transferir"
+                                        data-tp-image-caption="Se o banco alertar, conclua apenas se os dados estiverem corretos."
+                                        class="block text-left rounded-2xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition">
+                                        <img src="/8fd2d8fb-32f8-4f89-9f67-e939bd07337d.jpg"
+                                            alt="Exemplo de aviso de segurança antes de transferir"
+                                            class="w-full h-44 object-cover" loading="lazy">
                                         <div class="px-3 py-2 text-xs text-white/60 font-semibold">Exemplo 3</div>
                                     </button>
                                 </div>
@@ -151,9 +200,11 @@ $isLogged = !empty($_SESSION['user_id']);
                                 </div>
                             </div>
 
-                            <div id="checkout-alert" class="hidden rounded-2xl border px-4 py-3 text-sm font-semibold"></div>
+                            <div id="checkout-alert" class="hidden rounded-2xl border px-4 py-3 text-sm font-semibold">
+                            </div>
 
-                            <button id="btn-finish" class="w-full mt-4 px-6 py-4 rounded-2xl bg-green-600 hover:bg-green-700 font-black tracking-wide text-lg shadow-[0_0_22px_rgba(22,163,74,0.35)]">
+                            <button id="btn-finish"
+                                class="w-full mt-4 px-6 py-4 rounded-2xl bg-green-600 hover:bg-green-700 font-black tracking-wide text-lg shadow-[0_0_22px_rgba(22,163,74,0.35)]">
                                 Pagar e concluir
                             </button>
                         </form>
@@ -296,4 +347,5 @@ $isLogged = !empty($_SESSION['user_id']);
         })();
     </script>
 </body>
+
 </html>

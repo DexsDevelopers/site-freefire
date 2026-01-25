@@ -194,6 +194,8 @@ if (!$dbOk || count($products) === 0) {
         }
     </style>
     <script src="/assets/no-zoom.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/assets/3d-bg.js" defer></script>
 </head>
 
 <body class="bg-black text-white min-h-screen">
@@ -375,6 +377,8 @@ if (!$dbOk || count($products) === 0) {
     <div class="relative min-h-screen bg-black flex items-center overflow-hidden">
         <!-- Background Effect -->
         <div class="absolute inset-0 z-0">
+            <!-- 3D Canvas Container -->
+            <div id="canvas-3d" class="absolute inset-0 w-full h-full z-0 opacity-60"></div>
             <div
                 class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-900/40 via-black to-black opacity-80">
             </div>
