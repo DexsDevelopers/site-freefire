@@ -6,12 +6,18 @@ $db_pass = 'Lucastav8012@';
 $db_name = 'u853242961_only';
 
 // Conexão com o banco de dados
-$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+mysqli_report(MYSQLI_REPORT_OFF); // Disable default exception handling to handle it manually (optional, but safer for legacy style checks, or use try-catch)
 
-// Verifica a conexão
-if ($conn->connect_error) {
+try {
+    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+
+    // Verifica a conexão (caso exceptions estejam desligadas ou para garantir)
+    if ($conn->connect_error) {
+        throw new Exception($conn->connect_error);
+    }
+} catch (Exception $e) {
     header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Falha na conexão com o banco de dados: ' . $conn->connect_error]);
+    echo json_encode(['success' => false, 'message' => 'Falha na conexão com o banco de dados: ' . $e->getMessage()]);
     exit;
 }
 

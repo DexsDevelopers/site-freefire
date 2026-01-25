@@ -28,7 +28,7 @@ function db_has_column(mysqli $conn, $table, $column)
     $stmt->bind_param("ss", $table, $column);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
-    return ((int)($row['c'] ?? 0)) > 0;
+    return ((int) ($row['c'] ?? 0)) > 0;
 }
 
 function db_has_table(mysqli $conn, $table)
@@ -38,7 +38,7 @@ function db_has_table(mysqli $conn, $table)
     $stmt->bind_param("s", $table);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
-    return ((int)($row['c'] ?? 0)) > 0;
+    return ((int) ($row['c'] ?? 0)) > 0;
 }
 
 $hasRole = db_has_column($conn, 'users', 'role');
@@ -47,93 +47,97 @@ $hasAffiliateTables = db_has_table($conn, 'affiliate_accounts') && db_has_table(
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
-if ($action === 'register') {
-    $name = $_POST['name'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
+try {
+    if ($action === 'register') {
+        $name = $_POST['name'] ?? '';
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
 
-    if (empty($name) || empty($email) || empty($password)) {
-        echo json_encode(['success' => false, 'message' => 'Preencha todos os campos.']);
-        exit;
-    }
-
-    // Verifica se email já existe
-    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    if ($stmt->get_result()->num_rows > 0) {
-        echo json_encode(['success' => false, 'message' => 'Email já cadastrado.']);
-        exit;
-    }
-
-    $password_hash = password_hash($password, PASSWORD_DEFAULT);
-    $affiliate_user_id = (int)($_SESSION['affiliate_user_id'] ?? 0);
-
-    if ($hasReferredBy && $affiliate_user_id > 0) {
-        $stmt = $conn->prepare("INSERT INTO users (name, email, password, referred_by) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("sssi", $name, $email, $password_hash, $affiliate_user_id);
-    } else {
-        $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $name, $email, $password_hash);
-    }
-
-    if ($stmt->execute()) {
-        session_regenerate_id(true);
-        $newUserId = (int)$stmt->insert_id;
-        $_SESSION['user_id'] = $newUserId;
-        $_SESSION['user_name'] = $name;
-        if ($hasRole) {
-            $_SESSION['user_role'] = 'user';
-            $_SESSION['is_admin'] = false;
+        if (empty($name) || empty($email) || empty($password)) {
+            echo json_encode(['success' => false, 'message' => 'Preencha todos os campos.']);
+            exit;
         }
 
-        if ($hasAffiliateTables && $affiliate_user_id > 0 && $affiliate_user_id !== $newUserId) {
-            $stmt2 = $conn->prepare("INSERT IGNORE INTO affiliate_referrals (affiliate_user_id, referred_user_id) VALUES (?, ?)");
-            $stmt2->bind_param("ii", $affiliate_user_id, $newUserId);
-            $stmt2->execute();
+        // Verifica se email já existe
+        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows > 0) {
+            echo json_encode(['success' => false, 'message' => 'Email já cadastrado.']);
+            exit;
         }
 
-        echo json_encode(['success' => true, 'message' => 'Cadastro realizado com sucesso!']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar.']);
-    }
-} elseif ($action === 'login') {
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
+        $password_hash = password_hash($password, PASSWORD_DEFAULT);
+        $affiliate_user_id = (int) ($_SESSION['affiliate_user_id'] ?? 0);
 
-    if (empty($email) || empty($password)) {
-        echo json_encode(['success' => false, 'message' => 'Preencha todos os campos.']);
-        exit;
-    }
-
-    $stmt = $hasRole
-        ? $conn->prepare("SELECT id, name, password, role FROM users WHERE email = ?")
-        : $conn->prepare("SELECT id, name, password FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($row = $result->fetch_assoc()) {
-        if (password_verify($password, $row['password'])) {
-            session_regenerate_id(true);
-            $_SESSION['user_id'] = $row['id'];
-            $_SESSION['user_name'] = $row['name'];
-            if ($hasRole) {
-                $_SESSION['user_role'] = (string)($row['role'] ?? 'user');
-                $_SESSION['is_admin'] = ($_SESSION['user_role'] === 'admin');
-            }
-            echo json_encode(['success' => true, 'message' => 'Login realizado com sucesso!']);
+        if ($hasReferredBy && $affiliate_user_id > 0) {
+            $stmt = $conn->prepare("INSERT INTO users (name, email, password, referred_by) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("sssi", $name, $email, $password_hash, $affiliate_user_id);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Senha incorreta.']);
+            $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $name, $email, $password_hash);
         }
+
+        if ($stmt->execute()) {
+            session_regenerate_id(true);
+            $newUserId = (int) $stmt->insert_id;
+            $_SESSION['user_id'] = $newUserId;
+            $_SESSION['user_name'] = $name;
+            if ($hasRole) {
+                $_SESSION['user_role'] = 'user';
+                $_SESSION['is_admin'] = false;
+            }
+
+            if ($hasAffiliateTables && $affiliate_user_id > 0 && $affiliate_user_id !== $newUserId) {
+                $stmt2 = $conn->prepare("INSERT IGNORE INTO affiliate_referrals (affiliate_user_id, referred_user_id) VALUES (?, ?)");
+                $stmt2->bind_param("ii", $affiliate_user_id, $newUserId);
+                $stmt2->execute();
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Cadastro realizado com sucesso!']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar.']);
+        }
+    } elseif ($action === 'login') {
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+
+        if (empty($email) || empty($password)) {
+            echo json_encode(['success' => false, 'message' => 'Preencha todos os campos.']);
+            exit;
+        }
+
+        $stmt = $hasRole
+            ? $conn->prepare("SELECT id, name, password, role FROM users WHERE email = ?")
+            : $conn->prepare("SELECT id, name, password FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($row = $result->fetch_assoc()) {
+            if (password_verify($password, $row['password'])) {
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = $row['id'];
+                $_SESSION['user_name'] = $row['name'];
+                if ($hasRole) {
+                    $_SESSION['user_role'] = (string) ($row['role'] ?? 'user');
+                    $_SESSION['is_admin'] = ($_SESSION['user_role'] === 'admin');
+                }
+                echo json_encode(['success' => true, 'message' => 'Login realizado com sucesso!']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Senha incorreta.']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Usuário não encontrado.']);
+        }
+    } elseif ($action === 'logout') {
+        session_destroy();
+        header("Location: /login.php");
+        exit;
     } else {
-        echo json_encode(['success' => false, 'message' => 'Usuário não encontrado.']);
+        echo json_encode(['success' => false, 'message' => 'Ação inválida.']);
     }
-} elseif ($action === 'logout') {
-    session_destroy();
-    header("Location: /login.php");
-    exit;
-} else {
-    echo json_encode(['success' => false, 'message' => 'Ação inválida.']);
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'message' => 'Erro interno do servidor: ' . $e->getMessage()]);
 }
 ?>
