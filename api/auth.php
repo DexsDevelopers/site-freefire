@@ -96,7 +96,7 @@ try {
 
             echo json_encode(['success' => true, 'message' => 'Cadastro realizado com sucesso!']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar.']);
+            echo json_encode(['success' => false, 'message' => 'Erro ao cadastrar: ' . $stmt->error]);
         }
     } elseif ($action === 'login') {
         $email = $_POST['email'] ?? '';
